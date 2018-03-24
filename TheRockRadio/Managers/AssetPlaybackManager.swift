@@ -32,8 +32,8 @@ class AssetPlaybackManager: NSObject {
     
     /// The `NSKeyValueObservation` for the KVO on \AVPlayer.currentItem.
     private var playerObserver: NSKeyValueObservation?
-    
-    /// The AVPlayerItem associated with AssetPlaybackManager.asset.urlAsset
+	
+	/// The AVPlayerItem associated with AssetPlaybackManager.asset.urlAsset
     private var playerItem: AVPlayerItem? {
         willSet {
             /// Remove any previous KVO observer.
@@ -76,6 +76,7 @@ class AssetPlaybackManager: NSObject {
                     
                     strongSelf.playerItem = AVPlayerItem(asset: urlAsset)
                     strongSelf.player.replaceCurrentItem(with: strongSelf.playerItem)
+					strongSelf.playerItem?.addObserver(strongSelf, forKeyPath: "timedMetadata", options: [], context: nil)
                 }
             }
             else {
@@ -90,6 +91,9 @@ class AssetPlaybackManager: NSObject {
     
     override private init() {
         super.init()
+		// metadata observer
+		self.playerItem?.addObserver(self, forKeyPath: "timedMetadata", options: [], context: nil)
+		
         playerObserver = player.observe(\AVPlayer.currentItem, options: [.new]) { [weak self] (player, _) in
             guard let strongSelf = self else { return }
             
@@ -97,12 +101,37 @@ class AssetPlaybackManager: NSObject {
         }
         
         player.usesExternalPlaybackWhileExternalScreenIsActive = true
+		self.playerItem?.addObserver(self, forKeyPath: "timedMetadata", options: [], context: nil)
     }
     
     deinit {
         /// Remove any KVO observer.
         playerObserver?.invalidate()
     }
+	override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+		
+
+		if keyPath != "timedMetadata" {
+			print("not timedMetadata")
+			return
+		}
+		
+		let playerItem = object as! AVPlayerItem
+		for metadata in playerItem.timedMetadata! {
+			print(metadata.value ?? "fred")
+			let description = metadata.key?.description ?? ""
+			let keySpace = metadata.keySpace ?? nil
+			let commonKey = metadata.commonKey ?? nil
+			let stringValue = metadata.stringValue ?? ""
+			print("\n key: \(description) \n keySpace: \(String(describing: keySpace)) \n commonKey: \(String(describing: commonKey)) \n value: \(stringValue)")
+			
+			if let songName = metadata.value(forKey: "value") as? String {
+				print("song name is '\(songName)'")
+				NotificationCenter.default.post(name: NSNotification.Name(rawValue: "SongName"), object: songName)
+			}
+		}
+	}
+
     
     /**
      Replaces the currently playing `Asset`, if any, with a new `Asset`. If nil
