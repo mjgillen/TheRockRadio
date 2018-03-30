@@ -8,6 +8,7 @@
 
 import UIKit
 import AVFoundation
+import MediaPlayer
 
 class AssetPlaybackManager: NSObject {
     
@@ -76,7 +77,7 @@ class AssetPlaybackManager: NSObject {
                     
                     strongSelf.playerItem = AVPlayerItem(asset: urlAsset)
                     strongSelf.player.replaceCurrentItem(with: strongSelf.playerItem)
-					strongSelf.playerItem?.addObserver(strongSelf, forKeyPath: "timedMetadata", options: [], context: nil)
+					strongSelf.playerItem?.addObserver(strongSelf, forKeyPath: "timedMetadata", options: [.new], context: nil)
                 }
             }
             else {
@@ -92,8 +93,6 @@ class AssetPlaybackManager: NSObject {
     override private init() {
         super.init()
 		// metadata observer
-		self.playerItem?.addObserver(self, forKeyPath: "timedMetadata", options: [], context: nil)
-		
         playerObserver = player.observe(\AVPlayer.currentItem, options: [.new]) { [weak self] (player, _) in
             guard let strongSelf = self else { return }
             
@@ -101,7 +100,6 @@ class AssetPlaybackManager: NSObject {
         }
         
         player.usesExternalPlaybackWhileExternalScreenIsActive = true
-		self.playerItem?.addObserver(self, forKeyPath: "timedMetadata", options: [], context: nil)
     }
     
     deinit {
@@ -116,18 +114,18 @@ class AssetPlaybackManager: NSObject {
 			return
 		}
 		
-		let playerItem = object as! AVPlayerItem
-		for metadata in playerItem.timedMetadata! {
-			print(metadata.value ?? "fred")
-			let description = metadata.key?.description ?? ""
-			let keySpace = metadata.keySpace ?? nil
-			let commonKey = metadata.commonKey ?? nil
-			let stringValue = metadata.stringValue ?? ""
-			print("\n key: \(description) \n keySpace: \(String(describing: keySpace)) \n commonKey: \(String(describing: commonKey)) \n value: \(stringValue)")
-			
+		let observedPlayerItem: AVPlayerItem = self.playerItem!
+		for metadata in observedPlayerItem.timedMetadata! {
 			if let songName = metadata.value(forKey: "value") as? String {
 				print("song name is '\(songName)'")
-				NotificationCenter.default.post(name: NSNotification.Name(rawValue: "SongName"), object: songName)
+				NotificationCenter.default.post(name: NSNotification.Name(rawValue: "SongName"), object: songName)				
+				//			print(metadata.value ?? "fred")
+				//			let description = metadata.key?.description ?? ""
+				//			let keySpace = metadata.keySpace ?? nil
+				//			let commonKey = metadata.commonKey ?? nil
+				//			let stringValue = metadata.stringValue ?? ""
+				//			print("\n key: \(description) \n keySpace: \(String(describing: keySpace)) \n commonKey: \(String(describing: commonKey)) \n value: \(stringValue)")
+				//
 			}
 		}
 	}

@@ -16,6 +16,7 @@
 		4C4E36092055D80700833DB5 /* Stream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C4E36072055D80700833DB5 /* Stream.swift */; };
 		4C4E360A2055D80700833DB5 /* Asset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C4E36082055D80700833DB5 /* Asset.swift */; };
 		4C4E360C2055D82500833DB5 /* Streams.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4C4E360B2055D82500833DB5 /* Streams.plist */; };
+		4C86350E206DDC1100F9EA58 /* PlayerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C86350D206DDC1100F9EA58 /* PlayerViewController.swift */; };
 		4C8AB22E205761A200E61251 /* HomeScreenViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8AB22D205761A200E61251 /* HomeScreenViewController.swift */; };
 		4CD7262D205D7708001B25BF /* InfoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD7262C205D7708001B25BF /* InfoViewController.swift */; };
 /* End PBXBuildFile section */
@@ -32,6 +33,7 @@
 		4C4E36072055D80700833DB5 /* Stream.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Stream.swift; sourceTree = "<group>"; };
 		4C4E36082055D80700833DB5 /* Asset.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Asset.swift; sourceTree = "<group>"; };
 		4C4E360B2055D82500833DB5 /* Streams.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Streams.plist; sourceTree = "<group>"; };
+		4C86350D206DDC1100F9EA58 /* PlayerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerViewController.swift; sourceTree = "<group>"; };
 		4C8AB22D205761A200E61251 /* HomeScreenViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScreenViewController.swift; sourceTree = "<group>"; };
 		4CD7262C205D7708001B25BF /* InfoViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -68,8 +70,9 @@
 			children = (
 				4C4E35EB2055D20600833DB5 /* AppDelegate.swift */,
 				4C4E35EF2055D20600833DB5 /* Main.storyboard */,
-				4CD7262C205D7708001B25BF /* InfoViewController.swift */,
 				4C8AB22D205761A200E61251 /* HomeScreenViewController.swift */,
+				4CD7262C205D7708001B25BF /* InfoViewController.swift */,
+				4C86350D206DDC1100F9EA58 /* PlayerViewController.swift */,
 				4C4E35FD2055D7EC00833DB5 /* Managers */,
 				4C4E36062055D80700833DB5 /* Model */,
 				4C4E35F22055D20600833DB5 /* Assets.xcassets */,
@@ -177,6 +180,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4C4E35EC2055D20600833DB5 /* AppDelegate.swift in Sources */,
+				4C86350E206DDC1100F9EA58 /* PlayerViewController.swift in Sources */,
 				4C4E36032055D7EC00833DB5 /* AssetPlaybackManager.swift in Sources */,
 				4C4E36042055D7EC00833DB5 /* StreamListManager.swift in Sources */,
 				4CD7262D205D7708001B25BF /* InfoViewController.swift in Sources */,

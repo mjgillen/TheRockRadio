@@ -7,14 +7,13 @@
 //
 
 import UIKit
-//import AVFoundation
 import AVKit
 
 class HomeScreenViewController: UIViewController {
 
 	static let presentPlayerViewControllerSegueID = "PresentPlayerViewControllerSegueIdentifier"
 	
-	fileprivate var playerViewController: AVPlayerViewController?
+	fileprivate var playerViewController: PlayerViewController?
 	
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,17 +23,7 @@ class HomeScreenViewController: UIViewController {
     }
 
 	override func viewWillAppear(_ animated: Bool) {
-		super.viewWillAppear(animated)
-		
-//		self.performSegue(withIdentifier: HomeScreenViewController.presentPlayerViewControllerSegueID, sender: self)
-		
-//		if playerViewController != nil {
-//			// The view reappeared as a results of dismissing an AVPlayerViewController.
-//			// Perform cleanup.
-//			AssetPlaybackManager.sharedManager.setAssetForPlayback(nil)
-//			playerViewController?.player = nil
-//			playerViewController = nil
-//		}
+		super.viewWillAppear(animated)		
 	}
 
 	override func didReceiveMemoryWarning() {
@@ -46,13 +35,13 @@ class HomeScreenViewController: UIViewController {
 		super.prepare(for: segue, sender: sender)
 		
 		if segue.identifier == HomeScreenViewController.presentPlayerViewControllerSegueID {
-			guard let playerViewControler = segue.destination as? AVPlayerViewController else { return }
+			guard let seguePlayerViewController = segue.destination as? PlayerViewController else { return }
 			
 			/*
 			Grab a reference for the destinationViewController to use in later delegate callbacks from
 			AssetPlaybackManager.
 			*/
-			playerViewController = playerViewControler
+			playerViewController = seguePlayerViewController
 			
 			// Load the new Asset to playback into AssetPlaybackManager.
 			let urlAsset = AVURLAsset.init(url: URL.init(string: "https://streaming.radio.co/s96fbbec3a/listen")!)
@@ -68,6 +57,8 @@ Extend `AssetListTableViewController` to conform to the `AssetPlaybackDelegate` 
 extension HomeScreenViewController: AssetPlaybackDelegate {
 	func streamPlaybackManager(_ streamPlaybackManager: AssetPlaybackManager, playerReadyToPlay player: AVPlayer) {
 		player.play()
+		playerViewController?.player = player
+		NotificationCenter.default.post(name: NSNotification.Name(rawValue: "PlayerStartedPlaying"), object: nil)
 	}
 	
 	func streamPlaybackManager(_ streamPlaybackManager: AssetPlaybackManager,

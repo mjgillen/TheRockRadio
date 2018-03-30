@@ -47,9 +47,9 @@
                                 </connections>
                             </containerView>
                             <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="bAI-vC-bfB" userLabel="Bottom Container View">
-                                <rect key="frame" x="0.0" y="334" width="375" height="333"/>
+                                <rect key="frame" x="0.0" y="333.5" width="375" height="333.5"/>
                                 <connections>
-                                    <segue destination="Pcj-Rn-AxA" kind="embed" identifier="PresentPlayerViewControllerSegueIdentifier" id="QqN-oQ-w5o"/>
+                                    <segue destination="B3p-WR-xPN" kind="embed" identifier="PresentPlayerViewControllerSegueIdentifier" id="W8l-is-Cnn"/>
                                 </connections>
                             </containerView>
                         </subviews>
@@ -72,14 +72,6 @@
             </objects>
             <point key="canvasLocation" x="1352.8" y="780.35982008995506"/>
         </scene>
-        <!--AV Player View Controller-->
-        <scene sceneID="3aP-GM-lXf">
-            <objects>
-                <avPlayerViewController videoGravity="AVLayerVideoGravityResizeAspect" id="Pcj-Rn-AxA" sceneMemberID="viewController"/>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="52E-27-LQU" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="2210" y="931"/>
-        </scene>
         <!--Info View Controller-->
         <scene sceneID="Yt6-GO-bro">
             <objects>
@@ -92,16 +84,18 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="273"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Fred" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Qge-G2-1ls">
-                                <rect key="frame" x="154" y="115.5" width="67.5" height="42"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="35"/>
-                                <nil key="textColor"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Song Title" lineBreakMode="tailTruncation" numberOfLines="6" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Qge-G2-1ls">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="273"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="30"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <nil key="highlightedColor"/>
                             </label>
                         </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
+                            <constraint firstItem="Qge-G2-1ls" firstAttribute="height" secondItem="RoA-yD-jxe" secondAttribute="height" id="6Mp-hK-T9R"/>
                             <constraint firstItem="Qge-G2-1ls" firstAttribute="centerX" secondItem="RoA-yD-jxe" secondAttribute="centerX" id="NNN-Ft-ZZB"/>
+                            <constraint firstItem="Qge-G2-1ls" firstAttribute="width" secondItem="RoA-yD-jxe" secondAttribute="width" id="OnY-Pt-3XB"/>
                             <constraint firstItem="Qge-G2-1ls" firstAttribute="centerY" secondItem="RoA-yD-jxe" secondAttribute="centerY" id="We0-Tk-J8o"/>
                         </constraints>
                     </view>
@@ -113,5 +107,58 @@
             </objects>
             <point key="canvasLocation" x="2208.8000000000002" y="603.14842578710648"/>
         </scene>
+        <!--Player View Controller-->
+        <scene sceneID="3Wr-Va-eQA">
+            <objects>
+                <viewController id="B3p-WR-xPN" customClass="PlayerViewController" customModule="TheRockRadio" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="CCz-a8-Xdx"/>
+                        <viewControllerLayoutGuide type="bottom" id="e9a-WZ-GXa"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="r6M-Hn-Bbj">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="333.5"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="dtY-hi-UP2">
+                                <rect key="frame" x="0.0" y="267" width="375" height="66.5"/>
+                                <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ZuF-BI-rGx">
+                                        <rect key="frame" x="162.5" y="8.5" width="50" height="50"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="50" id="81c-aW-sCC"/>
+                                            <constraint firstAttribute="height" constant="50" id="maY-2F-3MR"/>
+                                        </constraints>
+                                        <state key="normal" image="PlayButton"/>
+                                        <connections>
+                                            <action selector="onPlayPauseButton:" destination="B3p-WR-xPN" eventType="touchUpInside" id="1Ju-Bd-caq"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                                <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstItem="ZuF-BI-rGx" firstAttribute="centerY" secondItem="dtY-hi-UP2" secondAttribute="centerY" id="LGE-5g-fb2"/>
+                                    <constraint firstItem="ZuF-BI-rGx" firstAttribute="centerX" secondItem="dtY-hi-UP2" secondAttribute="centerX" id="awl-PL-ekH"/>
+                                </constraints>
+                            </view>
+                        </subviews>
+                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="dtY-hi-UP2" firstAttribute="centerX" secondItem="r6M-Hn-Bbj" secondAttribute="centerX" id="GCE-bC-kcX"/>
+                            <constraint firstItem="dtY-hi-UP2" firstAttribute="height" secondItem="r6M-Hn-Bbj" secondAttribute="height" multiplier="0.2" id="TM3-Zu-Yfx"/>
+                            <constraint firstItem="dtY-hi-UP2" firstAttribute="width" secondItem="r6M-Hn-Bbj" secondAttribute="width" id="Vra-pD-d7R"/>
+                            <constraint firstItem="dtY-hi-UP2" firstAttribute="bottom" secondItem="e9a-WZ-GXa" secondAttribute="top" id="aWH-Dw-iun"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="playPauseButton" destination="ZuF-BI-rGx" id="PAU-xO-xyl"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="JKT-jM-9w6" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2208.8000000000002" y="930.29556650246309"/>
+        </scene>
     </scenes>
+    <resources>
+        <image name="PlayButton" width="21" height="22"/>
+    </resources>
 </document>
