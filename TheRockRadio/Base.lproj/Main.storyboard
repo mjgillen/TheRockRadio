@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13771" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="0GS-23-uGy">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14109" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="0GS-23-uGy">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
         <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -49,7 +49,7 @@
                             <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="bAI-vC-bfB" userLabel="Bottom Container View">
                                 <rect key="frame" x="0.0" y="333.5" width="375" height="333.5"/>
                                 <connections>
-                                    <segue destination="B3p-WR-xPN" kind="embed" identifier="PresentPlayerViewControllerSegueIdentifier" id="W8l-is-Cnn"/>
+                                    <segue destination="emT-SQ-V63" kind="embed" identifier="PresentPlayerViewControllerSegueIdentifier" id="aW1-NF-4Ah"/>
                                 </connections>
                             </containerView>
                         </subviews>
@@ -107,6 +107,14 @@
             </objects>
             <point key="canvasLocation" x="2208.8000000000002" y="603.14842578710648"/>
         </scene>
+        <!--AV Player View Controller-->
+        <scene sceneID="SDD-Ak-lWM">
+            <objects>
+                <avPlayerViewController videoGravity="AVLayerVideoGravityResizeAspect" id="emT-SQ-V63" sceneMemberID="viewController"/>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="pKz-LS-MNF" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2209" y="971"/>
+        </scene>
         <!--Player View Controller-->
         <scene sceneID="3Wr-Va-eQA">
             <objects>
@@ -116,14 +124,14 @@
                         <viewControllerLayoutGuide type="bottom" id="e9a-WZ-GXa"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="r6M-Hn-Bbj">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="333.5"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="dtY-hi-UP2">
-                                <rect key="frame" x="0.0" y="267" width="375" height="66.5"/>
+                                <rect key="frame" x="0.0" y="533.5" width="375" height="133.5"/>
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ZuF-BI-rGx">
-                                        <rect key="frame" x="162.5" y="8.5" width="50" height="50"/>
+                                        <rect key="frame" x="162.5" y="42" width="50" height="50"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="50" id="81c-aW-sCC"/>
                                             <constraint firstAttribute="height" constant="50" id="maY-2F-3MR"/>
@@ -155,7 +163,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="JKT-jM-9w6" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2208.8000000000002" y="930.29556650246309"/>
+            <point key="canvasLocation" x="1353" y="1523"/>
         </scene>
     </scenes>
     <resources>

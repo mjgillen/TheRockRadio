@@ -114,6 +114,7 @@ class AssetPlaybackManager: NSObject {
 			return
 		}
 		
+		print("observed Value for Keypath called")
 		let observedPlayerItem: AVPlayerItem = self.playerItem!
 		for metadata in observedPlayerItem.timedMetadata! {
 			if let songName = metadata.value(forKey: "value") as? String {
@@ -126,6 +127,26 @@ class AssetPlaybackManager: NSObject {
 				//			let stringValue = metadata.stringValue ?? ""
 				//			print("\n key: \(description) \n keySpace: \(String(describing: keySpace)) \n commonKey: \(String(describing: commonKey)) \n value: \(stringValue)")
 				//
+				let nowPlaying = ["SongName": songName]
+				MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlaying
+			}
+		}
+		let observedObject: AVPlayerItem = object as! AVPlayerItem
+		print(observedObject.timedMetadata?.count ?? 0)
+		for metadata in observedObject.timedMetadata! {
+			print(metadata)
+			print(metadata.commonKey)
+			if let songName = metadata.value(forKey: "value") as? String {
+				print("observedObject song name is '\(songName)'")
+				NotificationCenter.default.post(name: NSNotification.Name(rawValue: "ObservedObjectSongName"), object: songName)
+				//			let description = metadata.key?.description ?? ""
+				//			let keySpace = metadata.keySpace ?? nil
+				//			let commonKey = metadata.commonKey ?? nil
+				//			let stringValue = metadata.stringValue ?? ""
+				//			print("\n key: \(description) \n keySpace: \(String(describing: keySpace)) \n commonKey: \(String(describing: commonKey)) \n value: \(stringValue)")
+				//
+//				let nowPlaying = ["SongName": songName]
+//				MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlaying
 			}
 		}
 	}
