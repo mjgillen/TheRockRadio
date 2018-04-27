@@ -10,12 +10,13 @@ import UIKit
 
 class InfoViewController: UIViewController {
 
-	@IBOutlet weak var titleLabel: UILabel!
+	@IBOutlet weak var titleHistory: UILabel!
+	//	@IBOutlet weak var titleLabel: UILabel!
 	override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Do any additional setup after loading the view.
-		NotificationCenter.default.addObserver(self, selector: #selector(InfoViewController.handleNotification), name: NSNotification.Name(rawValue: "SongName"), object: nil)
+        self.view.layer.borderWidth = 1.0
+		NotificationCenter.default.addObserver(self, selector: #selector(InfoViewController.handleNotification), name: NSNotification.Name(rawValue: "History"), object: nil)
     }
 
     override func didReceiveMemoryWarning() {
@@ -24,7 +25,31 @@ class InfoViewController: UIViewController {
     }
 	
 	@objc func handleNotification(notification: NSNotification) {
-		titleLabel.text = notification.object as? String
+		guard let historyDict = notification.userInfo as? [String: Any] else { return }
+
+		var titleAttributes: [NSAttributedStringKey : Any] = [
+			NSAttributedStringKey.foregroundColor : UIColor.black,
+			NSAttributedStringKey.font : UIFont(name: "SanFrancisco", size: CGFloat(25.0)) ?? UIFont.systemFont(ofSize: 25)
+		]
+		let playlist = NSMutableAttributedString.init(string: "Song History\n", attributes: titleAttributes)
+		titleAttributes[NSAttributedStringKey.font] = UIFont(name: "SanFrancisco", size: CGFloat(18.0)) ?? UIFont.systemFont(ofSize: 18)
+		titleAttributes[NSAttributedStringKey.foregroundColor] = UIColor.blue
+		for dict in historyDict {
+			if dict.key == "history" {
+				let historyArray = dict.value as! [Any]
+				for track in historyArray {
+					let x = track as! [String : Any]
+					var song = x["title"] as! String
+					if !song.contains("KEBF") {
+						song = song + "\n"
+						playlist.append(NSAttributedString.init(string: song, attributes: titleAttributes))
+					}
+				}
+			}
+		}
+		DispatchQueue.main.async {
+			self.titleHistory.attributedText = playlist
+		}
 	}
 
     /*

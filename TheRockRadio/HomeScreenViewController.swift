@@ -190,11 +190,23 @@ class HomeScreenViewController: UIViewController {
 				let afterSeparator = tempString.index(after: separator)
 				let next = tempString.index(after: afterSeparator)
 				let titleSlice = tempString.suffix(from: next)
-				currentTrackArtist = String(artistSlice)
 				currentTrackTitle = String(titleSlice)
+				currentTrackTitle = currentTrackTitle + "\n"
+				currentTrackArtist = String(artistSlice)
 //				let start_time = currentTrackDict["start_time"] as! String
+				let titleAttributes: [NSAttributedStringKey : Any] = [
+					NSAttributedStringKey.foregroundColor : UIColor.black,
+					NSAttributedStringKey.font : UIFont(name: "SanFrancisco", size: CGFloat(30.0)) ?? UIFont.systemFont(ofSize: 30)
+				]
+				let displayString = NSMutableAttributedString.init(string: currentTrackTitle, attributes: titleAttributes)
+				let artistAttributes = [
+					NSAttributedStringKey.foregroundColor : UIColor.red,
+					NSAttributedStringKey.font : UIFont(name: "SanFrancisco", size: CGFloat(20.0)) ?? UIFont.systemFont(ofSize: 20)
+				]
+				displayString.append(NSAttributedString.init(string: currentTrackArtist, attributes: artistAttributes))
+				
 				DispatchQueue.main.async {
-					self.songLabel.text = self.currentTrackTitle + "\n" + self.currentTrackArtist
+					self.songLabel.attributedText = displayString
 				}
 				updateNowPlaying()
 				
@@ -223,7 +235,18 @@ class HomeScreenViewController: UIViewController {
 				task.resume()
 			}
 			else if dict.key == "history" {
-				print(dict)
+//				let historyArray = dict.value as! [Any]
+//				var songArray: [[String: Any]] = [[:]]
+//				for track in historyArray {
+////					print(track)
+//					let x = track as! [String : Any]
+//					let song = x["title"] as? String
+//					print(song)
+//					songArray.append(x)
+//				}
+//				print("test")
+//				NotificationCenter.default.post(name: NSNotification.Name(rawValue: "History"), object: nil, userInfo: dict.value as? [AnyHashable : Any])
+				NotificationCenter.default.post(name: NSNotification.Name(rawValue: "History"), object: nil, userInfo: jsonData)
 			}
 		}
 	}
@@ -284,8 +307,9 @@ extension HomeScreenViewController: AssetPlaybackDelegate {
 		
 		// setup properties for the AVPlayerViewController
 		playerViewController?.allowsPictureInPicturePlayback = false
-		playerViewController?.contentOverlayView?.backgroundColor = .gray
 		playerViewController?.updatesNowPlayingInfoCenter = true
+		playerViewController?.contentOverlayView?.backgroundColor = .white
+		playerViewController?.contentOverlayView?.layer.borderWidth = 1.0
 		
 		// setup the label
 		let pvcWidth = Double((playerViewController?.contentOverlayView?.frame.width)!)
@@ -294,10 +318,12 @@ extension HomeScreenViewController: AssetPlaybackDelegate {
 		let offsetY = pvcHeight - 125.0
 		var rect = CGRect(x: offsetX, y: offsetY, width: pvcWidth - offsetX, height: 75.0)
 		songLabel = UILabel.init(frame: rect)
-		songLabel.textColor = .white
 		songLabel.text = ""
 		songLabel.font = UIFont.systemFont(ofSize: 30.0)
 		songLabel.numberOfLines = 2
+		songLabel.lineBreakMode = .byTruncatingMiddle
+		songLabel.textAlignment = .center
+//		songLabel.textColor = .white
 //		songLabel.backgroundColor = .red
 		
 		// album artwork image

@@ -84,23 +84,47 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="273"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Song Title" lineBreakMode="tailTruncation" numberOfLines="6" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Qge-G2-1ls">
+                            <imageView userInteractionEnabled="NO" alpha="0.5" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="RockWhaleStacks" translatesAutoresizingMaskIntoConstraints="NO" id="Xh9-wS-Bbb">
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="273"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="30"/>
-                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="top" horizontalHuggingPriority="251" verticalHuggingPriority="251" usesAttributedText="YES" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Atb-kV-iXX">
+                                <rect key="frame" x="37.5" y="0.0" width="300" height="273"/>
+                                <attributedString key="attributedText">
+                                    <fragment content="Pink Floyd - Dark Side of the Moon">
+                                        <attributes>
+                                            <color key="NSColor" red="0.0" green="0.50195999999999996" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <font key="NSFont" size="14.300000000000001" name="Courier"/>
+                                            <real key="NSKern" value="0.0"/>
+                                            <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="leftToRight" headIndent="72" defaultTabInterval="36" tighteningFactorForTruncation="0.0" allowsDefaultTighteningForTruncation="NO">
+                                                <tabStops>
+                                                    <textTab alignment="left" location="47">
+                                                        <options/>
+                                                    </textTab>
+                                                    <textTab alignment="natural" location="72">
+                                                        <options/>
+                                                    </textTab>
+                                                </tabStops>
+                                            </paragraphStyle>
+                                            <color key="NSStrokeColor" red="0.0" green="0.50195999999999996" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        </attributes>
+                                    </fragment>
+                                </attributedString>
                                 <nil key="highlightedColor"/>
                             </label>
                         </subviews>
-                        <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
-                            <constraint firstItem="Qge-G2-1ls" firstAttribute="height" secondItem="RoA-yD-jxe" secondAttribute="height" id="6Mp-hK-T9R"/>
-                            <constraint firstItem="Qge-G2-1ls" firstAttribute="centerX" secondItem="RoA-yD-jxe" secondAttribute="centerX" id="NNN-Ft-ZZB"/>
-                            <constraint firstItem="Qge-G2-1ls" firstAttribute="width" secondItem="RoA-yD-jxe" secondAttribute="width" id="OnY-Pt-3XB"/>
-                            <constraint firstItem="Qge-G2-1ls" firstAttribute="centerY" secondItem="RoA-yD-jxe" secondAttribute="centerY" id="We0-Tk-J8o"/>
+                            <constraint firstItem="Xh9-wS-Bbb" firstAttribute="centerX" secondItem="RoA-yD-jxe" secondAttribute="centerX" id="HS4-Yn-trS"/>
+                            <constraint firstItem="Atb-kV-iXX" firstAttribute="height" secondItem="RoA-yD-jxe" secondAttribute="height" id="Y2l-ee-WMm"/>
+                            <constraint firstItem="Xh9-wS-Bbb" firstAttribute="height" secondItem="RoA-yD-jxe" secondAttribute="height" id="aoa-AB-AzJ"/>
+                            <constraint firstItem="Atb-kV-iXX" firstAttribute="centerX" secondItem="RoA-yD-jxe" secondAttribute="centerX" id="bJl-He-nvR"/>
+                            <constraint firstItem="Xh9-wS-Bbb" firstAttribute="centerY" secondItem="RoA-yD-jxe" secondAttribute="centerY" id="j23-vL-zgh"/>
+                            <constraint firstItem="Xh9-wS-Bbb" firstAttribute="width" secondItem="RoA-yD-jxe" secondAttribute="width" id="sgJ-iV-aOi"/>
+                            <constraint firstItem="Atb-kV-iXX" firstAttribute="centerY" secondItem="RoA-yD-jxe" secondAttribute="centerY" id="uKn-RC-70i"/>
+                            <constraint firstItem="Atb-kV-iXX" firstAttribute="width" secondItem="RoA-yD-jxe" secondAttribute="width" multiplier="0.8" id="yKN-Vk-vXN"/>
                         </constraints>
                     </view>
                     <connections>
-                        <outlet property="titleLabel" destination="Qge-G2-1ls" id="y2E-kc-7P4"/>
+                        <outlet property="titleHistory" destination="Atb-kV-iXX" id="nD3-81-xV9"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="kby-Ul-dw3" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -168,5 +192,6 @@
     </scenes>
     <resources>
         <image name="PlayButton" width="21" height="22"/>
+        <image name="RockWhaleStacks" width="512" height="341"/>
     </resources>
 </document>
