@@ -35,6 +35,7 @@
 		4C4E360B2055D82500833DB5 /* Streams.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Streams.plist; sourceTree = "<group>"; };
 		4C86350D206DDC1100F9EA58 /* PlayerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerViewController.swift; sourceTree = "<group>"; };
 		4C8AB22D205761A200E61251 /* HomeScreenViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScreenViewController.swift; sourceTree = "<group>"; };
+		4CA3AA7F208BAE6C00CFC94C /* TheRockRadio.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = TheRockRadio.entitlements; sourceTree = "<group>"; };
 		4CD7262C205D7708001B25BF /* InfoViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -54,6 +55,7 @@
 			children = (
 				4C4E35EA2055D20600833DB5 /* TheRockRadio */,
 				4C4E35E92055D20600833DB5 /* Products */,
+				4CD744A7208B9E9D0023EAA7 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -69,6 +71,7 @@
 			isa = PBXGroup;
 			children = (
 				4C4E35EB2055D20600833DB5 /* AppDelegate.swift */,
+				4CA3AA7F208BAE6C00CFC94C /* TheRockRadio.entitlements */,
 				4C4E35EF2055D20600833DB5 /* Main.storyboard */,
 				4C8AB22D205761A200E61251 /* HomeScreenViewController.swift */,
 				4CD7262C205D7708001B25BF /* InfoViewController.swift */,
@@ -99,6 +102,13 @@
 				4C4E36082055D80700833DB5 /* Asset.swift */,
 			);
 			path = Model;
+			sourceTree = "<group>";
+		};
+		4CD744A7208B9E9D0023EAA7 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -133,10 +143,13 @@
 				TargetAttributes = {
 					4C4E35E72055D20600833DB5 = {
 						CreatedOnToolsVersion = 9.2;
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
 						SystemCapabilities = {
 							com.apple.BackgroundModes = {
 								enabled = 1;
+							};
+							com.apple.HealthKit = {
+								enabled = 0;
 							};
 						};
 					};
@@ -327,13 +340,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_ENTITLEMENTS = TheRockRadio/TheRockRadio.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = 5UFVF24W7K;
 				INFOPLIST_FILE = TheRockRadio/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.paradigm-performance.TheRockRadio";
+				PRODUCT_BUNDLE_IDENTIFIER = com.onthemovesoftware.TheRockRadio;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "9c9fd20e-72cf-4f3d-aecc-66f2e83e8d72";
+				PROVISIONING_PROFILE_SPECIFIER = "CarPlay iOS Development com.onthemovesoftware.*";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -343,13 +360,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_ENTITLEMENTS = TheRockRadio/TheRockRadio.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = 5UFVF24W7K;
 				INFOPLIST_FILE = TheRockRadio/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.paradigm-performance.TheRockRadio";
+				PRODUCT_BUNDLE_IDENTIFIER = com.onthemovesoftware.TheRockRadio;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "9c9fd20e-72cf-4f3d-aecc-66f2e83e8d72";
+				PROVISIONING_PROFILE_SPECIFIER = "CarPlay iOS Development com.onthemovesoftware.*";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

@@ -57,7 +57,7 @@ class AssetPlaybackManager: NSObject {
                     
                     print("Error: \(String(describing: error?.localizedDescription))")
                 }
-            }
+			}
         }
     }
     
@@ -106,9 +106,9 @@ class AssetPlaybackManager: NSObject {
         /// Remove any KVO observer.
         playerObserver?.invalidate()
     }
+	
 	override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
 		
-
 		if keyPath != "timedMetadata" {
 			print("not timedMetadata")
 			return
@@ -120,33 +120,14 @@ class AssetPlaybackManager: NSObject {
 			if let songName = metadata.value(forKey: "value") as? String {
 				print("song name is '\(songName)'")
 				NotificationCenter.default.post(name: NSNotification.Name(rawValue: "SongName"), object: songName)				
-				//			print(metadata.value ?? "fred")
-				//			let description = metadata.key?.description ?? ""
-				//			let keySpace = metadata.keySpace ?? nil
-				//			let commonKey = metadata.commonKey ?? nil
-				//			let stringValue = metadata.stringValue ?? ""
-				//			print("\n key: \(description) \n keySpace: \(String(describing: keySpace)) \n commonKey: \(String(describing: commonKey)) \n value: \(stringValue)")
-				//
-				let nowPlaying = ["SongName": songName]
-				MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlaying
 			}
 		}
 		let observedObject: AVPlayerItem = object as! AVPlayerItem
 		print(observedObject.timedMetadata?.count ?? 0)
 		for metadata in observedObject.timedMetadata! {
-			print(metadata)
-			print(metadata.commonKey)
 			if let songName = metadata.value(forKey: "value") as? String {
 				print("observedObject song name is '\(songName)'")
 				NotificationCenter.default.post(name: NSNotification.Name(rawValue: "ObservedObjectSongName"), object: songName)
-				//			let description = metadata.key?.description ?? ""
-				//			let keySpace = metadata.keySpace ?? nil
-				//			let commonKey = metadata.commonKey ?? nil
-				//			let stringValue = metadata.stringValue ?? ""
-				//			print("\n key: \(description) \n keySpace: \(String(describing: keySpace)) \n commonKey: \(String(describing: commonKey)) \n value: \(stringValue)")
-				//
-//				let nowPlaying = ["SongName": songName]
-//				MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlaying
 			}
 		}
 	}
@@ -159,7 +140,7 @@ class AssetPlaybackManager: NSObject {
      */
     func setAssetForPlayback(_ asset: Asset?) {
         self.asset = asset
-    }
+    }	
 }
 
 /// AssetPlaybackDelegate provides a common interface for AssetPlaybackManager to provide callbacks to its delegate.

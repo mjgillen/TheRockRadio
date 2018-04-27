@@ -19,6 +19,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 		do {
 			try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback)
+			//try AVAudioSession.sharedInstance().setCategory(AVAudioSessionModeSpokenAudio
 			try AVAudioSession.sharedInstance().setActive(true)
 		} catch  {
 			print(error)
