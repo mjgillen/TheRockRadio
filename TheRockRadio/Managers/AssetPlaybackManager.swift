@@ -114,19 +114,19 @@ class AssetPlaybackManager: NSObject {
 			return
 		}
 		
-		print("observed Value for Keypath called")
+//		print("observed Value for Keypath called")
 		let observedPlayerItem: AVPlayerItem = self.playerItem!
 		for metadata in observedPlayerItem.timedMetadata! {
 			if let songName = metadata.value(forKey: "value") as? String {
-				print("song name is '\(songName)'")
-				NotificationCenter.default.post(name: NSNotification.Name(rawValue: "SongName"), object: songName)				
+//				print("song name is '\(songName)'")
+				NotificationCenter.default.post(name: NSNotification.Name(rawValue: "SongName"), object: songName)
 			}
 		}
 		let observedObject: AVPlayerItem = object as! AVPlayerItem
-		print(observedObject.timedMetadata?.count ?? 0)
+//		print(observedObject.timedMetadata?.count ?? 0)
 		for metadata in observedObject.timedMetadata! {
 			if let songName = metadata.value(forKey: "value") as? String {
-				print("observedObject song name is '\(songName)'")
+//				print("observedObject song name is '\(songName)'")
 				NotificationCenter.default.post(name: NSNotification.Name(rawValue: "ObservedObjectSongName"), object: songName)
 			}
 		}

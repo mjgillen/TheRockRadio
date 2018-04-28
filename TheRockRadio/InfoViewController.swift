@@ -31,7 +31,7 @@ class InfoViewController: UIViewController {
 			NSAttributedStringKey.foregroundColor : UIColor.black,
 			NSAttributedStringKey.font : UIFont(name: "SanFrancisco", size: CGFloat(25.0)) ?? UIFont.systemFont(ofSize: 25)
 		]
-		let playlist = NSMutableAttributedString.init(string: "Song History\n", attributes: titleAttributes)
+		let playlist = NSMutableAttributedString.init(string: "Recently Played\n", attributes: titleAttributes)
 		titleAttributes[NSAttributedStringKey.font] = UIFont(name: "SanFrancisco", size: CGFloat(18.0)) ?? UIFont.systemFont(ofSize: 18)
 		titleAttributes[NSAttributedStringKey.foregroundColor] = UIColor.blue
 		for dict in historyDict {
