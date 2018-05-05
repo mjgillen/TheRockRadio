@@ -2,17 +2,17 @@
   "images" : [
     {
       "idiom" : "universal",
-      "filename" : "RockSunset.jpg",
+      "filename" : "StacksFog.jpg",
       "scale" : "1x"
     },
     {
       "idiom" : "universal",
-      "filename" : "RockSunset-1.jpg",
+      "filename" : "StacksFog-1.jpg",
       "scale" : "2x"
     },
     {
       "idiom" : "universal",
-      "filename" : "RockSunset-2.jpg",
+      "filename" : "StacksFog-2.jpg",
       "scale" : "3x"
     }
   ],

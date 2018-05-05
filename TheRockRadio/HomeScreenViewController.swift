@@ -13,13 +13,16 @@ import MediaPlayer
 class HomeScreenViewController: UIViewController {
 
 	static let presentPlayerViewControllerSegueID = "PresentPlayerViewControllerSegueIdentifier"
+	static let defaultTrackTitle = "KEBF/KZSR"
+	static let defaultTrackArtist = "97.3 / 107.9 The Rock Radio"
+	static let defaultAlbumArtwork: UIImage = #imageLiteral(resourceName: "RockLogo")
 	
 	fileprivate var playerViewController: AVPlayerViewController?
 	
 	// UI in the player window
 	var songLabel: UILabel!
-	var currentTrackTitle = "KEBF/KZSR"
-	var currentTrackArtist = "97.3 / 107.9 The Rock Radio"
+	var currentTrackTitle = HomeScreenViewController.defaultTrackTitle
+	var currentTrackArtist = HomeScreenViewController.defaultTrackArtist
 	var albumArtwork: UIImageView!
 	
     override func viewDidLoad() {
@@ -106,19 +109,38 @@ class HomeScreenViewController: UIViewController {
 	func processJSON(_ jsonData: [String : Any]) {
 		for dict in jsonData {
 			if dict.key == "current_track" {
-				let currentTrackDict = dict.value as! [String : Any]
-				let artwork_url = currentTrackDict["artwork_url"] as! String
-				let title = currentTrackDict["title"] as! String
-				let tempString = title
-				let separator = tempString.index(of: "-")!
-				let artistSlice = tempString[..<separator]
-				let afterSeparator = tempString.index(after: separator)
-				let next = tempString.index(after: afterSeparator)
-				let titleSlice = tempString.suffix(from: next)
-				currentTrackTitle = String(titleSlice)
-				currentTrackTitle = currentTrackTitle + "\n"
-				currentTrackArtist = String(artistSlice)
+				guard let currentTrackDict = dict.value as? [String : Any] else { return }
+				if let title = currentTrackDict["title"] as? String {
+					
+					// rework this to make it better and not crash
+					let tempString = title
+//					let tempString = "Rock 2"
+					if tempString.contains("-") {
+						let separator = tempString.index(of: "-")!
+						let artistSlice = tempString[..<separator]
+						let afterSeparator = tempString.index(after: separator)
+						let next = tempString.index(after: afterSeparator)
+						let titleSlice = tempString.suffix(from: next)
+						currentTrackTitle = String(titleSlice)
+						currentTrackTitle = currentTrackTitle + "\n"
+						currentTrackArtist = String(artistSlice)
+					}
+					else {
+						currentTrackTitle = tempString
+						currentTrackArtist = HomeScreenViewController.defaultTrackArtist
+					}
+				}
+				else {
+					currentTrackTitle = HomeScreenViewController.defaultTrackTitle
+					currentTrackArtist = HomeScreenViewController.defaultTrackArtist
+				}
+				
 //				let start_time = currentTrackDict["start_time"] as! String
+				if currentTrackTitle == "Unknown" {
+					currentTrackTitle = HomeScreenViewController.defaultTrackTitle
+					currentTrackArtist = HomeScreenViewController.defaultTrackArtist
+				}
+
 				let titleAttributes: [NSAttributedStringKey : Any] = [
 					NSAttributedStringKey.foregroundColor : UIColor.black,
 					NSAttributedStringKey.font : UIFont(name: "SanFrancisco", size: CGFloat(30.0)) ?? UIFont.systemFont(ofSize: 30)
@@ -135,29 +157,33 @@ class HomeScreenViewController: UIViewController {
 				}
 				updateNowPlaying()
 				
-				let artworkURL = URL.init(string: artwork_url)
-				let task = URLSession.shared.dataTask(with: artworkURL!) { data, response, error in
-					if let error = error {
-						self.handleClientError(error)
-						return
-					}
-					guard let httpResponse = response as? HTTPURLResponse,
-						(200...299).contains(httpResponse.statusCode) else {
-							self.handleServerError(response)
+				if let artwork_url = currentTrackDict["artwork_url"] as? String,
+					let artworkURL = URL.init(string: artwork_url) {
+					let task = URLSession.shared.dataTask(with: artworkURL) { data, response, error in
+						if let error = error {
+							self.handleClientError(error)
 							return
-					}
-					
-					if let data = data {
-						let dataImage = UIImage.init(data: data)
-						DispatchQueue.main.async {
-							self.albumArtwork.image = dataImage
-							if self.songLabel.text == "Unknown" {
-								self.songLabel.text = title
+						}
+						guard let httpResponse = response as? HTTPURLResponse,
+							(200...299).contains(httpResponse.statusCode) else {
+								self.handleServerError(response)
+								return
+						}
+						
+						if let data = data {
+							let dataImage = UIImage.init(data: data)
+							DispatchQueue.main.async {
+								self.albumArtwork.image = dataImage
 							}
 						}
 					}
+					task.resume()
 				}
-				task.resume()
+				else {
+					DispatchQueue.main.async {
+						self.albumArtwork.image = HomeScreenViewController.defaultAlbumArtwork
+					}
+				}
 			}
 			else if dict.key == "history" {
 //				let historyArray = dict.value as! [Any]
@@ -209,10 +235,11 @@ class HomeScreenViewController: UIViewController {
 			let type = AVAudioSessionInterruptionType(rawValue: typeValue) else {
 				return
 		}
+		guard let playerViewController = playerViewController else { return }
 		if type == .began {
 			// Interruption began, take appropriate actions
-			if playerViewController?.player?.rate == 1.0 {
-				playerViewController?.player?.pause()
+			if playerViewController.player?.rate == 1.0 {
+				playerViewController.player?.pause()
 			}
 		}
 		else if type == .ended {
@@ -220,16 +247,15 @@ class HomeScreenViewController: UIViewController {
 				let options = AVAudioSessionInterruptionOptions(rawValue: optionsValue)
 				if options.contains(.shouldResume) {
 					// Interruption Ended - playback should resume
-					if playerViewController?.player?.rate == 0.0 {
-						playerViewController?.player?.play()
-						updateNowPlaying()
+					if playerViewController.player?.rate == 0.0 {
+						playerViewController.player?.play()
 					}
 				} else {
 					// Interruption Ended - playback should NOT resume
-					updateNowPlaying()
 				}
 			}
 		}
+		updateNowPlaying()
 	}
 }
 
@@ -245,7 +271,7 @@ extension HomeScreenViewController: AssetPlaybackDelegate {
 		playerViewController?.allowsPictureInPicturePlayback = false
 		playerViewController?.updatesNowPlayingInfoCenter = true
 		playerViewController?.contentOverlayView?.backgroundColor = .white
-		playerViewController?.contentOverlayView?.layer.borderWidth = 1.0
+//		playerViewController?.contentOverlayView?.layer.borderWidth = 1.0
 		
 		// setup the label
 		let pvcWidth = Double((playerViewController?.contentOverlayView?.frame.width)!)

@@ -1,5 +1,5 @@
 //
-//  InfoViewController.swift
+//  RecentlyPlayedViewController.swift
 //  TheRockRadio
 //
 //  Created by Michael Gillen on 3/17/18.
@@ -8,15 +8,15 @@
 
 import UIKit
 
-class InfoViewController: UIViewController {
+class RecentlyPlayedViewController: UIViewController {
 
 	@IBOutlet weak var titleHistory: UILabel!
 	//	@IBOutlet weak var titleLabel: UILabel!
 	override func viewDidLoad() {
         super.viewDidLoad()
 
-        self.view.layer.borderWidth = 1.0
-		NotificationCenter.default.addObserver(self, selector: #selector(InfoViewController.handleNotification), name: NSNotification.Name(rawValue: "History"), object: nil)
+//        self.view.layer.borderWidth = 1.0
+		NotificationCenter.default.addObserver(self, selector: #selector(RecentlyPlayedViewController.handleNotification), name: NSNotification.Name(rawValue: "History"), object: nil)
     }
 
     override func didReceiveMemoryWarning() {
@@ -36,6 +36,7 @@ class InfoViewController: UIViewController {
 		titleAttributes[NSAttributedStringKey.foregroundColor] = UIColor.blue
 		for dict in historyDict {
 			if dict.key == "history" {
+				print(dict.value)
 				let historyArray = dict.value as! [Any]
 				for track in historyArray {
 					let x = track as! [String : Any]

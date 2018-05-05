@@ -149,6 +149,18 @@
       "idiom" : "ios-marketing",
       "filename" : "ItunesArtwork@2x.png",
       "scale" : "1x"
+    },
+    {
+      "size" : "60x60",
+      "idiom" : "car",
+      "filename" : "Icon-App-60x60@2x-1.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "60x60",
+      "idiom" : "car",
+      "filename" : "Icon-App-60x60@3x-1.png",
+      "scale" : "3x"
     }
   ],
   "info" : {
