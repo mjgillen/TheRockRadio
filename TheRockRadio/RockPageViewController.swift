@@ -12,8 +12,7 @@ class RockPageViewController: UIPageViewController {
 
 	private(set) lazy var orderedViewControllers: [UIViewController] = {
 		return [self.newViewControllerWith(name: "RecentlyPlayed"),
-				self.newViewControllerWith(name: "Program"),
-				self.newViewControllerWith(name: "Third")]
+				self.newViewControllerWith(name: "Website")]
 	}()
 	
 	private func newViewControllerWith(name: String) -> UIViewController {

@@ -19,6 +19,7 @@
 		4C86350E206DDC1100F9EA58 /* PlayerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C86350D206DDC1100F9EA58 /* PlayerViewController.swift */; };
 		4C8AB22E205761A200E61251 /* HomeScreenViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8AB22D205761A200E61251 /* HomeScreenViewController.swift */; };
 		4CD7262D205D7708001B25BF /* RecentlyPlayedViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD7262C205D7708001B25BF /* RecentlyPlayedViewController.swift */; };
+		4CEF5CBD209EA49E006EEEA1 /* WebsiteViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEF5CBC209EA49E006EEEA1 /* WebsiteViewController.swift */; };
 		4CFF8AE3209551B100921DC8 /* RockPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CFF8AE2209551B100921DC8 /* RockPageViewController.swift */; };
 /* End PBXBuildFile section */
 
@@ -38,6 +39,7 @@
 		4C8AB22D205761A200E61251 /* HomeScreenViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScreenViewController.swift; sourceTree = "<group>"; };
 		4CA3AA7F208BAE6C00CFC94C /* TheRockRadio.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = TheRockRadio.entitlements; sourceTree = "<group>"; };
 		4CD7262C205D7708001B25BF /* RecentlyPlayedViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentlyPlayedViewController.swift; sourceTree = "<group>"; };
+		4CEF5CBC209EA49E006EEEA1 /* WebsiteViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebsiteViewController.swift; sourceTree = "<group>"; };
 		4CFF8AE2209551B100921DC8 /* RockPageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RockPageViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -73,11 +75,11 @@
 			isa = PBXGroup;
 			children = (
 				4C4E35EB2055D20600833DB5 /* AppDelegate.swift */,
-				4CA3AA7F208BAE6C00CFC94C /* TheRockRadio.entitlements */,
 				4C4E35EF2055D20600833DB5 /* Main.storyboard */,
 				4CFF8AE2209551B100921DC8 /* RockPageViewController.swift */,
 				4C8AB22D205761A200E61251 /* HomeScreenViewController.swift */,
 				4CD7262C205D7708001B25BF /* RecentlyPlayedViewController.swift */,
+				4CEF5CBC209EA49E006EEEA1 /* WebsiteViewController.swift */,
 				4C86350D206DDC1100F9EA58 /* PlayerViewController.swift */,
 				4C4E35FD2055D7EC00833DB5 /* Managers */,
 				4C4E36062055D80700833DB5 /* Model */,
@@ -85,6 +87,7 @@
 				4C4E35F42055D20600833DB5 /* LaunchScreen.storyboard */,
 				4C4E360B2055D82500833DB5 /* Streams.plist */,
 				4C4E35F72055D20600833DB5 /* Info.plist */,
+				4CA3AA7F208BAE6C00CFC94C /* TheRockRadio.entitlements */,
 			);
 			path = TheRockRadio;
 			sourceTree = "<group>";
@@ -195,6 +198,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4CEF5CBD209EA49E006EEEA1 /* WebsiteViewController.swift in Sources */,
 				4C4E35EC2055D20600833DB5 /* AppDelegate.swift in Sources */,
 				4C86350E206DDC1100F9EA58 /* PlayerViewController.swift in Sources */,
 				4C4E36032055D7EC00833DB5 /* AssetPlaybackManager.swift in Sources */,

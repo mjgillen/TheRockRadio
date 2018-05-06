@@ -13,7 +13,7 @@ import MediaPlayer
 class HomeScreenViewController: UIViewController {
 
 	static let presentPlayerViewControllerSegueID = "PresentPlayerViewControllerSegueIdentifier"
-	static let defaultTrackTitle = "KEBF/KZSR"
+	static let defaultTrackTitle = "KEBF/KZSR\n"
 	static let defaultTrackArtist = "97.3 / 107.9 The Rock Radio"
 	static let defaultAlbumArtwork: UIImage = #imageLiteral(resourceName: "RockLogo")
 	
@@ -112,21 +112,32 @@ class HomeScreenViewController: UIViewController {
 				guard let currentTrackDict = dict.value as? [String : Any] else { return }
 				if let title = currentTrackDict["title"] as? String {
 					
-					// rework this to make it better and not crash
 					let tempString = title
-//					let tempString = "Rock 2"
+//					let tempString = "Fred"
 					if tempString.contains("-") {
 						let separator = tempString.index(of: "-")!
 						let artistSlice = tempString[..<separator]
-						let afterSeparator = tempString.index(after: separator)
-						let next = tempString.index(after: afterSeparator)
-						let titleSlice = tempString.suffix(from: next)
-						currentTrackTitle = String(titleSlice)
-						currentTrackTitle = currentTrackTitle + "\n"
-						currentTrackArtist = String(artistSlice)
+						if separator < tempString.endIndex {
+							let afterSeparator = tempString.index(after: separator)
+							if afterSeparator < tempString.endIndex {
+								let next = tempString.index(after: afterSeparator)
+								let titleSlice = tempString.suffix(from: next)
+								currentTrackTitle = String(titleSlice)
+								currentTrackTitle = currentTrackTitle + "\n"
+								currentTrackArtist = String(artistSlice)
+							}
+							else {
+								currentTrackTitle = tempString + "\n"
+								currentTrackArtist = HomeScreenViewController.defaultTrackArtist
+							}
+						}
+						else {
+							currentTrackTitle = tempString + "\n"
+							currentTrackArtist = HomeScreenViewController.defaultTrackArtist
+						}
 					}
 					else {
-						currentTrackTitle = tempString
+						currentTrackTitle = tempString + "\n"
 						currentTrackArtist = HomeScreenViewController.defaultTrackArtist
 					}
 				}
@@ -136,19 +147,30 @@ class HomeScreenViewController: UIViewController {
 				}
 				
 //				let start_time = currentTrackDict["start_time"] as! String
-				if currentTrackTitle == "Unknown" {
+				if currentTrackTitle == "Unknown" || currentTrackTitle == "" {
 					currentTrackTitle = HomeScreenViewController.defaultTrackTitle
 					currentTrackArtist = HomeScreenViewController.defaultTrackArtist
 				}
-
+				
+				if currentTrackArtist == "" {
+					currentTrackArtist = HomeScreenViewController.defaultTrackArtist
+				}
+				
+//				for familyName:String in UIFont.familyNames {
+//					print("Family Name: \(familyName)")
+//					for fontName:String in UIFont.fontNames(forFamilyName: familyName) {
+//						print("--Font Name: \(fontName)")
+//					}
+//				}
+				
 				let titleAttributes: [NSAttributedStringKey : Any] = [
 					NSAttributedStringKey.foregroundColor : UIColor.black,
-					NSAttributedStringKey.font : UIFont(name: "SanFrancisco", size: CGFloat(30.0)) ?? UIFont.systemFont(ofSize: 30)
+					NSAttributedStringKey.font : UIFont.systemFont(ofSize: 30)
 				]
 				let displayString = NSMutableAttributedString.init(string: currentTrackTitle, attributes: titleAttributes)
 				let artistAttributes = [
 					NSAttributedStringKey.foregroundColor : UIColor.red,
-					NSAttributedStringKey.font : UIFont(name: "SanFrancisco", size: CGFloat(20.0)) ?? UIFont.systemFont(ofSize: 20)
+					NSAttributedStringKey.font : UIFont.systemFont(ofSize: 20)
 				]
 				displayString.append(NSAttributedString.init(string: currentTrackArtist, attributes: artistAttributes))
 				
