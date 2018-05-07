@@ -46,7 +46,8 @@ class AssetPlaybackManager: NSObject {
         didSet {
             playerItemObserver = playerItem?.observe(\AVPlayerItem.status, options: [.new, .initial]) { [weak self] (item, _) in
                 guard let strongSelf = self else { return }
-                
+				
+//				print("------------------------------------------>>>>>>>>>. \(item.status)")
                 if item.status == .readyToPlay {
                     if !strongSelf.readyForPlayback {
                         strongSelf.readyForPlayback = true

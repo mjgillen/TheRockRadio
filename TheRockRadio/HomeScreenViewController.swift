@@ -33,10 +33,13 @@ class HomeScreenViewController: UIViewController {
 		NotificationCenter.default.addObserver(self, selector: #selector(HomeScreenViewController.handleNotification), name: NSNotification.Name(rawValue: "ObservedObjectSongName"), object: nil)
 		// handle interruptions
 		let notificationCenter = NotificationCenter.default
-		notificationCenter.addObserver(self,
-									   selector: #selector(handleInterruption),
-									   name: .AVAudioSessionInterruption,
-									   object: nil)
+		notificationCenter.addObserver(self, selector: #selector(handleInterruption), name: .AVAudioSessionInterruption, object: nil)
+//		notificationCenter.addObserver(self, selector: #selector(handleRouteChange), name: .AVAudioSessionRouteChange, object: nil)
+//		notificationCenter.addObserver(self, selector: #selector(handleMediaReset), name: .AVAudioSessionMediaServicesWereReset, object: nil)
+		
+//		UIApplication.shared.beginReceivingRemoteControlEvents()
+//		notificationCenter.addObserver(self, selector: #selector(handleRemoteControlEvent), name: NSNotification.Name(rawValue: "TogglePlay"), object: nil)
+//		notificationCenter.addObserver(self, selector: #selector(handleRemoteControlEvent), name: NSNotification.Name(rawValue: "TogglePause"), object: nil)
 	}
 
 	override func viewWillAppear(_ animated: Bool) {
@@ -156,13 +159,6 @@ class HomeScreenViewController: UIViewController {
 					currentTrackArtist = HomeScreenViewController.defaultTrackArtist
 				}
 				
-//				for familyName:String in UIFont.familyNames {
-//					print("Family Name: \(familyName)")
-//					for fontName:String in UIFont.fontNames(forFamilyName: familyName) {
-//						print("--Font Name: \(fontName)")
-//					}
-//				}
-				
 				let titleAttributes: [NSAttributedStringKey : Any] = [
 					NSAttributedStringKey.foregroundColor : UIColor.black,
 					NSAttributedStringKey.font : UIFont.systemFont(ofSize: 30)
@@ -246,9 +242,11 @@ class HomeScreenViewController: UIViewController {
 	}
 	
 	func handleClientError(_ error: Error) {
+		print("handleClientError")
 	}
 
 	func handleServerError(_ response: URLResponse?) {
+		print("handleServerError")
 	}
 
 	@objc func handleInterruption(notification: Notification) {
@@ -278,6 +276,67 @@ class HomeScreenViewController: UIViewController {
 			}
 		}
 		updateNowPlaying()
+	}
+	
+	@objc
+	func handleRouteChange(notification: Notification) {
+//		guard let userInfo = notification.userInfo,
+//			let reasonValue = userInfo[AVAudioSessionRouteChangeReasonKey] as? UInt,
+//			let reason = AVAudioSessionRouteChangeReason(rawValue:reasonValue) else {
+//				return
+//		}
+//		switch reason {
+//		case .newDeviceAvailable:
+//			let session = AVAudioSession.sharedInstance()
+//			for output in session.currentRoute.outputs where output.portType == AVAudioSessionPortHeadphones {
+//				headphonesConnected = true
+//				break
+//			}
+//		case .oldDeviceUnavailable:
+//			if let previousRoute =
+//				userInfo[AVAudioSessionRouteChangePreviousRouteKey] as? AVAudioSessionRouteDescription {
+//				for output in previousRoute.outputs where output.portType == AVAudioSessionPortHeadphones {
+//					headphonesConnected = false
+//					break
+//				}
+//			}
+//		default: ()
+//		}
+	}
+
+	@objc
+	func handleMediaReset(notification: Notification) {
+//		guard let userInfo = notification.userInfo,
+//			let reasonValue = userInfo[AVAudioSessionRouteChangeReasonKey] as? UInt,
+//			let reason = AVAudioSessionRouteChangeReason(rawValue:reasonValue) else {
+//				return
+//		}
+//		switch reason {
+//		case .newDeviceAvailable:
+//			let session = AVAudioSession.sharedInstance()
+//			for output in session.currentRoute.outputs where output.portType == AVAudioSessionPortHeadphones {
+//				//				headphonesConnected = true
+//				break
+//			}
+//		case .oldDeviceUnavailable:
+//			if let previousRoute =
+//				userInfo[AVAudioSessionRouteChangePreviousRouteKey] as? AVAudioSessionRouteDescription {
+//				for output in previousRoute.outputs where output.portType == AVAudioSessionPortHeadphones {
+//					//					headphonesConnected = false
+//					break
+//				}
+//			}
+//		default: ()
+//		}
+	}
+
+	@objc
+	func handleRemoteControlEvent(notification: Notification) {
+//		guard let userInfo = notification.userInfo,
+//			let reasonValue = userInfo[AVAudioSessionRouteChangeReasonKey] as? UInt,
+//			let reason = AVAudioSessionRouteChangeReason(rawValue:reasonValue) else {
+//				return
+//		}
 	}
 }
 

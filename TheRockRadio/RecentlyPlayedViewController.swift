@@ -36,7 +36,7 @@ class RecentlyPlayedViewController: UIViewController {
 		titleAttributes[NSAttributedStringKey.foregroundColor] = UIColor.blue
 		for dict in historyDict {
 			if dict.key == "history" {
-				print(dict.value)
+//				print(dict.value)
 				let historyArray = dict.value as! [Any]
 				for track in historyArray {
 					let x = track as! [String : Any]
