@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4C13086720BC8ABC00F39891 /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C13086620BC8ABC00F39891 /* Common.swift */; };
 		4C4E35EC2055D20600833DB5 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C4E35EB2055D20600833DB5 /* AppDelegate.swift */; };
 		4C4E35F12055D20600833DB5 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4C4E35EF2055D20600833DB5 /* Main.storyboard */; };
 		4C4E35F32055D20600833DB5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4C4E35F22055D20600833DB5 /* Assets.xcassets */; };
@@ -19,11 +20,15 @@
 		4C86350E206DDC1100F9EA58 /* PlayerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C86350D206DDC1100F9EA58 /* PlayerViewController.swift */; };
 		4C8AB22E205761A200E61251 /* HomeScreenViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8AB22D205761A200E61251 /* HomeScreenViewController.swift */; };
 		4CD7262D205D7708001B25BF /* RecentlyPlayedViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD7262C205D7708001B25BF /* RecentlyPlayedViewController.swift */; };
+		4CE0F1FB20BCDDC70096A5DD /* RSSTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE0F1FA20BCDDC70096A5DD /* RSSTableViewController.swift */; };
+		4CE1D56F20BBA49600E605D2 /* Reachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE1D56E20BBA49600E605D2 /* Reachability.swift */; };
 		4CEF5CBD209EA49E006EEEA1 /* WebsiteViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEF5CBC209EA49E006EEEA1 /* WebsiteViewController.swift */; };
+		4CFCAB0E20BAE74B00B28844 /* LoggerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CFCAB0D20BAE74B00B28844 /* LoggerViewController.swift */; };
 		4CFF8AE3209551B100921DC8 /* RockPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CFF8AE2209551B100921DC8 /* RockPageViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		4C13086620BC8ABC00F39891 /* Common.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Common.swift; path = TheRockRadio/Common.swift; sourceTree = SOURCE_ROOT; };
 		4C4E35E82055D20600833DB5 /* TheRockRadio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TheRockRadio.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C4E35EB2055D20600833DB5 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4C4E35F02055D20600833DB5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -39,7 +44,10 @@
 		4C8AB22D205761A200E61251 /* HomeScreenViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScreenViewController.swift; sourceTree = "<group>"; };
 		4CA3AA7F208BAE6C00CFC94C /* TheRockRadio.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = TheRockRadio.entitlements; sourceTree = "<group>"; };
 		4CD7262C205D7708001B25BF /* RecentlyPlayedViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentlyPlayedViewController.swift; sourceTree = "<group>"; };
+		4CE0F1FA20BCDDC70096A5DD /* RSSTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RSSTableViewController.swift; sourceTree = "<group>"; };
+		4CE1D56E20BBA49600E605D2 /* Reachability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reachability.swift; sourceTree = "<group>"; };
 		4CEF5CBC209EA49E006EEEA1 /* WebsiteViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebsiteViewController.swift; sourceTree = "<group>"; };
+		4CFCAB0D20BAE74B00B28844 /* LoggerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggerViewController.swift; sourceTree = "<group>"; };
 		4CFF8AE2209551B100921DC8 /* RockPageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RockPageViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -80,6 +88,10 @@
 				4C8AB22D205761A200E61251 /* HomeScreenViewController.swift */,
 				4CD7262C205D7708001B25BF /* RecentlyPlayedViewController.swift */,
 				4CEF5CBC209EA49E006EEEA1 /* WebsiteViewController.swift */,
+				4CE0F1FA20BCDDC70096A5DD /* RSSTableViewController.swift */,
+				4CFCAB0D20BAE74B00B28844 /* LoggerViewController.swift */,
+				4CE1D56E20BBA49600E605D2 /* Reachability.swift */,
+				4C13086620BC8ABC00F39891 /* Common.swift */,
 				4C86350D206DDC1100F9EA58 /* PlayerViewController.swift */,
 				4C4E35FD2055D7EC00833DB5 /* Managers */,
 				4C4E36062055D80700833DB5 /* Model */,
@@ -200,9 +212,13 @@
 			files = (
 				4CEF5CBD209EA49E006EEEA1 /* WebsiteViewController.swift in Sources */,
 				4C4E35EC2055D20600833DB5 /* AppDelegate.swift in Sources */,
+				4C13086720BC8ABC00F39891 /* Common.swift in Sources */,
 				4C86350E206DDC1100F9EA58 /* PlayerViewController.swift in Sources */,
+				4CE1D56F20BBA49600E605D2 /* Reachability.swift in Sources */,
+				4CFCAB0E20BAE74B00B28844 /* LoggerViewController.swift in Sources */,
 				4C4E36032055D7EC00833DB5 /* AssetPlaybackManager.swift in Sources */,
 				4C4E36042055D7EC00833DB5 /* StreamListManager.swift in Sources */,
+				4CE0F1FB20BCDDC70096A5DD /* RSSTableViewController.swift in Sources */,
 				4CD7262D205D7708001B25BF /* RecentlyPlayedViewController.swift in Sources */,
 				4C4E360A2055D80700833DB5 /* Asset.swift in Sources */,
 				4CFF8AE3209551B100921DC8 /* RockPageViewController.swift in Sources */,

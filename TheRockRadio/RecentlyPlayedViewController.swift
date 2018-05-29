@@ -11,11 +11,8 @@ import UIKit
 class RecentlyPlayedViewController: UIViewController {
 
 	@IBOutlet weak var titleHistory: UILabel!
-	//	@IBOutlet weak var titleLabel: UILabel!
 	override func viewDidLoad() {
         super.viewDidLoad()
-
-//        self.view.layer.borderWidth = 1.0
 		NotificationCenter.default.addObserver(self, selector: #selector(RecentlyPlayedViewController.handleNotification), name: NSNotification.Name(rawValue: "History"), object: nil)
     }
 
@@ -24,19 +21,21 @@ class RecentlyPlayedViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
 	
+	override func viewWillAppear(_ animated: Bool) {
+		NotificationCenter.default.post(name: NSNotification.Name(rawValue: "ObservedObjectSongName"), object: nil)
+	}
+	
 	@objc func handleNotification(notification: NSNotification) {
 		guard let historyDict = notification.userInfo as? [String: Any] else { return }
-
 		var titleAttributes: [NSAttributedStringKey : Any] = [
 			NSAttributedStringKey.foregroundColor : UIColor.black,
-			NSAttributedStringKey.font : UIFont(name: "SanFrancisco", size: CGFloat(25.0)) ?? UIFont.systemFont(ofSize: 25)
+			NSAttributedStringKey.font : UIFont.systemFont(ofSize: 25)
 		]
 		let playlist = NSMutableAttributedString.init(string: "Recently Played\n", attributes: titleAttributes)
-		titleAttributes[NSAttributedStringKey.font] = UIFont(name: "SanFrancisco", size: CGFloat(18.0)) ?? UIFont.systemFont(ofSize: 18)
+		titleAttributes[NSAttributedStringKey.font] = UIFont.systemFont(ofSize: 18)
 		titleAttributes[NSAttributedStringKey.foregroundColor] = UIColor.blue
 		for dict in historyDict {
 			if dict.key == "history" {
-//				print(dict.value)
 				let historyArray = dict.value as! [Any]
 				for track in historyArray {
 					let x = track as! [String : Any]
@@ -52,15 +51,4 @@ class RecentlyPlayedViewController: UIViewController {
 			self.titleHistory.attributedText = playlist
 		}
 	}
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
 }

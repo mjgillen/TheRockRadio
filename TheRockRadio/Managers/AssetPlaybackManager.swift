@@ -46,32 +46,47 @@ class AssetPlaybackManager: NSObject {
         didSet {
             playerItemObserver = playerItem?.observe(\AVPlayerItem.status, options: [.new, .initial]) { [weak self] (item, _) in
                 guard let strongSelf = self else { return }
-				
-//				print("------------------------------------------>>>>>>>>>. \(item.status)")
+				loggingText = loggingText.add(string: "playerItemObserver item.status = \(item.status)")
                 if item.status == .readyToPlay {
                     if !strongSelf.readyForPlayback {
+						loggingText = loggingText.add(string: "playerItem readyToPlay")
+						assetIsReady = true
                         strongSelf.readyForPlayback = true
+						retryCount = 0
                         strongSelf.delegate?.streamPlaybackManager(strongSelf, playerReadyToPlay: strongSelf.player)
                     }
                 } else if item.status == .failed {
                     let error = item.error
-                    
-                    print("Error: \(String(describing: error?.localizedDescription))")
+					loggingText = loggingText.add(string: "playerItemObserver error loading asset = \(String(describing: error?.localizedDescription))")
+					assetIsReady = false
+					// try to recover
+					if retryCount < 15 {
+						retryCount += 1
+						loggingText = loggingText.add(string: "playerItemObserver error retrying)")
+						self?.perform(#selector(self?.postReloadNotification), with: nil, afterDelay: Double(retryCount))
+					} else {
+						// $TODO: retried a bunch now what?
+						loggingText = loggingText.add(string: "playerItemObserver error 15 RETRIES exhausted)")
+					}
                 }
 			}
         }
     }
-    
+	
+	// send message to mainVC to reload the URL due to error conditions
+	@objc func postReloadNotification() {
+		NotificationCenter.default.post(name: NSNotification.Name(rawValue: "ReloadURL"), object: nil)
+	}
+	
     /// The Asset that is currently being loaded for playback.
     private var asset: Asset? {
         willSet {
             /// Remove any previous KVO observer.
             guard let urlAssetObserver = urlAssetObserver else { return }
-            
             urlAssetObserver.invalidate()
         }
-        
         didSet {
+			loggingText = loggingText.add(string: "var asset didSet")
             if let asset = asset {
                 urlAssetObserver = asset.urlAsset.observe(\AVURLAsset.isPlayable, options: [.new, .initial]) { [weak self] (urlAsset, _) in
                     guard let strongSelf = self, urlAsset.isPlayable == true else { return }
@@ -79,27 +94,27 @@ class AssetPlaybackManager: NSObject {
                     strongSelf.playerItem = AVPlayerItem(asset: urlAsset)
                     strongSelf.player.replaceCurrentItem(with: strongSelf.playerItem)
 					strongSelf.playerItem?.addObserver(strongSelf, forKeyPath: "timedMetadata", options: [.new], context: nil)
+					loggingText = loggingText.add(string: "var asset didSet new PlayerItem")
                 }
             }
             else {
                 playerItem = nil
                 player.replaceCurrentItem(with: nil)
                 readyForPlayback = false
+				assetIsReady = false
+				// $TODO: put up an alert to try again.
             }
         }
     }
     
     // MARK: Intitialization
-    
     override private init() {
         super.init()
 		// metadata observer
         playerObserver = player.observe(\AVPlayer.currentItem, options: [.new]) { [weak self] (player, _) in
             guard let strongSelf = self else { return }
-            
             strongSelf.delegate?.streamPlaybackManager(strongSelf, playerCurrentItemDidChange: player)
         }
-        
         player.usesExternalPlaybackWhileExternalScreenIsActive = true
     }
     
@@ -111,7 +126,7 @@ class AssetPlaybackManager: NSObject {
 	override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
 		
 		if keyPath != "timedMetadata" {
-			print("not timedMetadata")
+			loggingText = loggingText.add(string: "not timedMetadata")
 			return
 		}		
 		guard let observedObject: AVPlayerItem = object as? AVPlayerItem else { return }
@@ -122,7 +137,6 @@ class AssetPlaybackManager: NSObject {
 			}
 		}
 	}
-
     
     /**
      Replaces the currently playing `Asset`, if any, with a new `Asset`. If nil
@@ -130,6 +144,7 @@ class AssetPlaybackManager: NSObject {
      and handle KVO cleanup.
      */
     func setAssetForPlayback(_ asset: Asset?) {
+		loggingText = loggingText.add(string: "setAssetForPlayback")
         self.asset = asset
     }	
 }

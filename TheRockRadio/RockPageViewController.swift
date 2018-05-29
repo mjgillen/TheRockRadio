@@ -10,9 +10,12 @@ import UIKit
 
 class RockPageViewController: UIPageViewController {
 
-	private(set) lazy var orderedViewControllers: [UIViewController] = {
-		return [self.newViewControllerWith(name: "RecentlyPlayed"),
-				self.newViewControllerWith(name: "Website")]
+	private(set) lazy var orderedViewControllers: [UIViewController] = { // Website RecentlyPlayed Logger
+		return [self.newViewControllerWith(name: "Logger"),
+				self.newViewControllerWith(name: "RSS"),
+				self.newViewControllerWith(name: "Website"),
+				self.newViewControllerWith(name: "RecentlyPlayed")
+		]
 	}()
 	
 	private func newViewControllerWith(name: String) -> UIViewController {
@@ -35,15 +38,6 @@ class RockPageViewController: UIPageViewController {
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
-    }
-    
-
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
     }
 }
 
