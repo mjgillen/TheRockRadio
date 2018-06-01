@@ -18,7 +18,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 	func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
 		loggingText = loggingText.add(string: "didFinishLaunchingWithOptions")
 		do {
-			try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback)
+			try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback) // $TODO: May need to restart session after loss of wifi? Add movie playback?
 			//try AVAudioSession.sharedInstance().setCategory(AVAudioSessionModeSpokenAudio
 			try AVAudioSession.sharedInstance().setActive(true)
 		} catch  {

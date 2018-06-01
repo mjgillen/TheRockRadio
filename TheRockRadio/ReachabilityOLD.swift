@@ -1,5 +1,5 @@
 //
-//  Connectability.swift
+//  ReachabilityOLD.swift
 //  TheRockRadio
 //
 //  Created by Michael Gillen on 5/27/18.
@@ -8,7 +8,7 @@
 
 import SystemConfiguration
 
-public class Reachability {
+public class ReachabilityOLD {
 	
 	class func isConnectedToNetwork() -> Bool {
 		

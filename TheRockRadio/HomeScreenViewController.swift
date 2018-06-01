@@ -16,14 +16,12 @@ var loggingText = ""
 var loggingLabel = UILabel()
 
 // state flags
-var avPlayerVCisReady = false
+var avPlayerVCisReady = true
 var assetIsReady = false
 var isReachable = false
 var retryCount = 0
 
 class HomeScreenViewController: UIViewController {
-
-	static let kReachabilityChangedNotification = "kNetworkReachabilityChangedNotification"
 
 	static let presentPlayerViewControllerSegueID = "PresentPlayerViewControllerSegueIdentifier"
 	static let defaultTrackTitle = "KEBF/KZSR\n"
@@ -55,25 +53,19 @@ class HomeScreenViewController: UIViewController {
 		notificationCenter.addObserver(self, selector: #selector(reloadURL), name: NSNotification.Name(rawValue: "ReloadURL"), object: nil)
 
 		// handle interruptions
-		notificationCenter.addObserver(self, selector: #selector(handleInterruption), name: .AVAudioSessionInterruption, object: nil)
-		notificationCenter.addObserver(self, selector: #selector(handleRouteChange), name: .AVAudioSessionRouteChange, object: nil)
-		notificationCenter.addObserver(self, selector: #selector(handleMediaReset), name: .AVAudioSessionMediaServicesWereReset, object: nil)
+		DispatchQueue.main.async {
+			notificationCenter.addObserver(self, selector: #selector(HomeScreenViewController.handleInterruption), name: .AVAudioSessionInterruption, object: AVAudioSession.sharedInstance)
+			notificationCenter.addObserver(self, selector: #selector(HomeScreenViewController.handleRouteChange), name: .AVAudioSessionRouteChange, object: nil)
+			notificationCenter.addObserver(self, selector: #selector(HomeScreenViewController.handleMediaReset), name: .AVAudioSessionMediaServicesWereReset, object: nil)
+		}
 		
 //		UIApplication.shared.beginReceivingRemoteControlEvents()
 //		notificationCenter.addObserver(self, selector: #selector(handleRemoteControlEvent), name: NSNotification.Name(rawValue: "TogglePlay"), object: nil)
 //		notificationCenter.addObserver(self, selector: #selector(handleRemoteControlEvent), name: NSNotification.Name(rawValue: "TogglePause"), object: nil)
 		
-//		// Reachability
-//		if Reachability.isConnectedToNetwork() {
-//			loggingText = loggingText.add(string: "Internet Connection Available!")
-//			isReachable = true
-//		} else {
-//			loggingText = loggingText.add(string: "Internet Connection not Available!")
-//			isReachable = false
-//		}
 		
 		// Observe the kNetworkReachabilityChangedNotification. When that notification is posted, the method reachabilityChanged will be called.
-		notificationCenter.addObserver(self, selector:#selector(reachabilityChanged), name:NSNotification.Name(rawValue: HomeScreenViewController.kReachabilityChangedNotification), object:nil)
+//		notificationCenter.addObserver(self, selector:#selector(reachabilityChanged), name:NSNotification.Name(rawValue: HomeScreenViewController.kReachabilityChangedNotification), object:nil)
 	}
 
 	override func viewWillAppear(_ animated: Bool) {
@@ -301,6 +293,7 @@ class HomeScreenViewController: UIViewController {
 	}
 	
 	func updateNowPlaying() {
+		loggingText = loggingText.add(string: "updateNowPlaying")
 		// Set Metadata to be Displayed in Now Playing Info Center
 		let playerRate = playerViewController?.player?.rate ?? 0.0
 		let infoCenter = MPNowPlayingInfoCenter.default()
@@ -327,7 +320,7 @@ class HomeScreenViewController: UIViewController {
 		loggingText = loggingText.add(string: "handleServerError")
 	}
 
-	@objc func handleInterruption(notification: Notification) {
+	@objc func handleInterruption(notification: Notification) { // kAudioSessionProperty_ServerDied
 		loggingText = loggingText.add(string: "handleInterruption notification")
 		guard let userInfo = notification.userInfo,
 			let typeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
@@ -432,15 +425,6 @@ class HomeScreenViewController: UIViewController {
 //				return
 //		}
 	}
-	
-	/*!
-	* Called by Reachability whenever status changes.
-	*/
-	@objc func reachabilityChanged(notification: NSNotification) {
-//	Reachability* curReach = [note object];
-//	NSParameterAssert([curReach isKindOfClass:[Reachability class]]);
-	}
-
 }
 
 extension HomeScreenViewController: AssetPlaybackDelegate {
@@ -494,7 +478,17 @@ extension HomeScreenViewController: AssetPlaybackDelegate {
 		commandCenter.playCommand.addTarget { (event) -> MPRemoteCommandHandlerStatus in
 			loggingText = loggingText.add(string: "commandCenter.playCommand")
 			if self.playerViewController?.player?.rate == 0.0 {
-				self.playerViewController?.player?.play()
+//				if Reachability.isConnectedToNetwork() {
+					loggingText = loggingText.add(string: "commandCenter.playCommand connected to network")
+					DispatchQueue.main.async {
+						self.playerViewController?.player?.play()
+					}
+//				} else {
+//					loggingText = loggingText.add(string: "commandCenter.playCommand NOT connected to network")
+//					loggingText = loggingText.add(string: "commandCenter.playCommand reloading URL()")
+//					self.reloadURL()
+//					return MPRemoteCommandHandlerStatus.commandFailed
+//				}
 			}
 			self.updateNowPlaying()
 			return MPRemoteCommandHandlerStatus.success
@@ -521,7 +515,11 @@ extension HomeScreenViewController: AssetPlaybackDelegate {
 // add strings together = append. this is a continuous logging string
 extension String {
 	func add(string: String) -> String {
-		let newString = self + "  " + string + "\n"
+		let dateFormatter = DateFormatter()
+		dateFormatter.dateFormat = "h:mm"
+		let dateString = dateFormatter.string(from: Date())
+		var newString = self + "  " + dateString
+		newString = newString + " " + string + "\n"
 		DispatchQueue.main.async {
 			loggingLabel.text = newString
 			loggingLabel.sizeToFit()

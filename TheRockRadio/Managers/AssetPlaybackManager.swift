@@ -10,6 +10,10 @@ import UIKit
 import AVFoundation
 import MediaPlayer
 
+private var PlayerContext = 0
+private var PlayerRate = 0
+private var TimedMetadataContext = 0
+
 class AssetPlaybackManager: NSObject {
     
     // MARK: Properties
@@ -34,6 +38,9 @@ class AssetPlaybackManager: NSObject {
     /// The `NSKeyValueObservation` for the KVO on \AVPlayer.currentItem.
     private var playerObserver: NSKeyValueObservation?
 	
+	/// The `NSKeyValueObservation` for the KVO on \AVPlayer
+	private var playerPlayerObserver: NSKeyValueObservation?
+//
 	/// The AVPlayerItem associated with AssetPlaybackManager.asset.urlAsset
     private var playerItem: AVPlayerItem? {
         willSet {
@@ -46,7 +53,7 @@ class AssetPlaybackManager: NSObject {
         didSet {
             playerItemObserver = playerItem?.observe(\AVPlayerItem.status, options: [.new, .initial]) { [weak self] (item, _) in
                 guard let strongSelf = self else { return }
-				loggingText = loggingText.add(string: "playerItemObserver item.status = \(item.status)")
+				loggingText = loggingText.add(string: "playerItemObserver item.status = \(item.status.rawValue)")
                 if item.status == .readyToPlay {
                     if !strongSelf.readyForPlayback {
 						loggingText = loggingText.add(string: "playerItem readyToPlay")
@@ -57,6 +64,7 @@ class AssetPlaybackManager: NSObject {
                     }
                 } else if item.status == .failed {
                     let error = item.error
+					loggingText = loggingText.add(string: "playerItemObserver item.status = .failed")
 					loggingText = loggingText.add(string: "playerItemObserver error loading asset = \(String(describing: error?.localizedDescription))")
 					assetIsReady = false
 					// try to recover
@@ -93,7 +101,11 @@ class AssetPlaybackManager: NSObject {
                     
                     strongSelf.playerItem = AVPlayerItem(asset: urlAsset)
                     strongSelf.player.replaceCurrentItem(with: strongSelf.playerItem)
-					strongSelf.playerItem?.addObserver(strongSelf, forKeyPath: "timedMetadata", options: [.new], context: nil)
+					DispatchQueue.main.async {
+						strongSelf.playerItem?.addObserver(strongSelf, forKeyPath: "timedMetadata", options: [.new], context: &TimedMetadataContext)
+						strongSelf.player.addObserver(strongSelf, forKeyPath: "status", options: [.new], context: &PlayerContext)
+						strongSelf.player.addObserver(strongSelf, forKeyPath: "rate", options: [.new], context: &PlayerRate)
+					}
 					loggingText = loggingText.add(string: "var asset didSet new PlayerItem")
                 }
             }
@@ -115,7 +127,7 @@ class AssetPlaybackManager: NSObject {
             guard let strongSelf = self else { return }
             strongSelf.delegate?.streamPlaybackManager(strongSelf, playerCurrentItemDidChange: player)
         }
-        player.usesExternalPlaybackWhileExternalScreenIsActive = true
+		//        player.usesExternalPlaybackWhileExternalScreenIsActive = true $TODO: MJG ??? was true
     }
     
     deinit {
@@ -125,16 +137,36 @@ class AssetPlaybackManager: NSObject {
 	
 	override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
 		
-		if keyPath != "timedMetadata" {
-			loggingText = loggingText.add(string: "not timedMetadata")
-			return
-		}		
-		guard let observedObject: AVPlayerItem = object as? AVPlayerItem else { return }
-		guard (observedObject.timedMetadata != nil) else { return }
-		for metadata in observedObject.timedMetadata! {
-			if let songName = metadata.value(forKey: "value") as? String {
-				NotificationCenter.default.post(name: NSNotification.Name(rawValue: "ObservedObjectSongName"), object: songName)
+//		if keyPath != "timedMetadata" {
+//			loggingText = loggingText.add(string: "not timedMetadata")
+//			return
+//		}
+		if context == &TimedMetadataContext {
+			loggingText = loggingText.add(string: "observeValue TimedMetadataContext")
+			guard let observedObject: AVPlayerItem = object as? AVPlayerItem else { return }
+			guard (observedObject.timedMetadata != nil) else { return }
+			for metadata in observedObject.timedMetadata! {
+				if let songName = metadata.value(forKey: "value") as? String {
+					NotificationCenter.default.post(name: NSNotification.Name(rawValue: "ObservedObjectSongName"), object: songName)
+				}
 			}
+		} else if context == &PlayerContext {
+			loggingText = loggingText.add(string: "observeValue PlayerContext")
+			guard let thePlayer: AVPlayer = object as? AVPlayer else {
+				loggingText = loggingText.add(string: "observeValue PlayerContext could not get object as AVPlayer")
+				return
+			}
+			let status = thePlayer.status
+			if status == .failed {
+				loggingText = loggingText.add(string: "observeValue PlayerContext status = .failed")
+			}
+		} else if context == &PlayerRate {
+			guard let thePlayer: AVPlayer = object as? AVPlayer else {
+				loggingText = loggingText.add(string: "observeValue PlayerContext could not get object as AVPlayer")
+				return
+			}
+			let playerRate = thePlayer.rate
+			loggingText = loggingText.add(string: "observeValue PlayerContext rate = \(playerRate)")
 		}
 	}
     
