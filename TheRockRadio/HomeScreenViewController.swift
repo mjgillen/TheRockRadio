@@ -39,6 +39,14 @@ class HomeScreenViewController: UIViewController {
 	var currentTrackArtist = HomeScreenViewController.defaultTrackArtist
 	var albumArtwork: UIImageView!
 	
+	// Reachability
+	var reachability: Reachability?
+	var networkStatus = UILabel()
+	var hostNameLabel = UILabel()
+	let hostNames = [nil, "apple.com", "invalidhost"]
+	var hostIndex = 0
+
+	
     override func viewDidLoad() {
         super.viewDidLoad()
 		loggingText = loggingText.add(string: "viewDidLoad")
@@ -66,6 +74,9 @@ class HomeScreenViewController: UIViewController {
 		
 		// Observe the kNetworkReachabilityChangedNotification. When that notification is posted, the method reachabilityChanged will be called.
 //		notificationCenter.addObserver(self, selector:#selector(reachabilityChanged), name:NSNotification.Name(rawValue: HomeScreenViewController.kReachabilityChangedNotification), object:nil)
+		
+		// Reachability
+//		startHost(at: 0)
 	}
 
 	override func viewWillAppear(_ animated: Bool) {
@@ -87,6 +98,10 @@ class HomeScreenViewController: UIViewController {
 		return .portrait
 	}
 	
+	deinit {
+		stopNotifier()
+	}
+
 	override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
 		super.prepare(for: segue, sender: sender)
 		if segue.identifier == HomeScreenViewController.presentPlayerViewControllerSegueID {
@@ -396,34 +411,14 @@ class HomeScreenViewController: UIViewController {
 		guard let userInfo = notification.userInfo else { return }
 		
 		print("MJG ------------------------------------------------------------------->>> handleMediaReset with reason = \(userInfo)")
-		loggingText = loggingText.add(string: "handleMediaReset with reason = \(userInfo)")
-
-//		switch reason {
-//		case .newDeviceAvailable:
-//			let session = AVAudioSession.sharedInstance()
-//			for output in session.currentRoute.outputs where output.portType == AVAudioSessionPortHeadphones {
-//				//				headphonesConnected = true
-//				break
-//			}
-//		case .oldDeviceUnavailable:
-//			if let previousRoute =
-//				userInfo[AVAudioSessionRouteChangePreviousRouteKey] as? AVAudioSessionRouteDescription {
-//				for output in previousRoute.outputs where output.portType == AVAudioSessionPortHeadphones {
-//					//					headphonesConnected = false
-//					break
-//				}
-//			}
-//		default: ()
-//		}
+		loggingText = loggingText.add(string: "handleMediaReset AVAudioSessionMediaServicesWereReset with reason = \(userInfo)")
+		reloadURL()
 	}
 
 	@objc
 	func handleRemoteControlEvent(notification: Notification) {
-//		guard let userInfo = notification.userInfo,
-//			let reasonValue = userInfo[AVAudioSessionRouteChangeReasonKey] as? UInt,
-//			let reason = AVAudioSessionRouteChangeReason(rawValue:reasonValue) else {
-//				return
-//		}
+		print("MJG ------------------------------------------------------------------->>> handleRemoteControlEvent")
+		loggingText = loggingText.add(string: "handleRemoteControlEvent")
 	}
 }
 
@@ -526,6 +521,95 @@ extension String {
 		}
 		print("MJG ------------------------------------------------------------------->>> \(string)")
 		return newString
+	}
+}
+
+// Reachability
+extension HomeScreenViewController {
+
+	func startHost(at index: Int) {
+		stopNotifier()
+		setupReachability(hostNames[index], useClosures: true)
+		startNotifier()
+		DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+			self.startHost(at: (index + 1) % 3)
+		}
+	}
+
+	func setupReachability(_ hostName: String?, useClosures: Bool) {
+		let reachability: Reachability?
+		if let hostName = hostName {
+			reachability = Reachability(hostname: hostName)
+			hostNameLabel.text = hostName
+		} else {
+			reachability = Reachability()
+			hostNameLabel.text = "No host name"
+		}
+		self.reachability = reachability
+		print("--- set up with host name: \(hostNameLabel.text!)")
+		
+		if useClosures {
+			reachability?.whenReachable = { reachability in
+				self.updateLabelColourWhenReachable(reachability)
+			}
+			reachability?.whenUnreachable = { reachability in
+				self.updateLabelColourWhenNotReachable(reachability)
+			}
+		} else {
+			NotificationCenter.default.addObserver(
+				self,
+				selector: #selector(reachabilityChanged(_:)),
+				name: .reachabilityChanged,
+				object: reachability
+			)
+		}
+	}
+	
+	func startNotifier() {
+		print("--- start notifier")
+		do {
+			try reachability?.startNotifier()
+		} catch {
+			networkStatus.textColor = .red
+			networkStatus.text = "Unable to start\nnotifier"
+			return
+		}
+	}
+	
+	func stopNotifier() {
+		print("--- stop notifier")
+		reachability?.stopNotifier()
+		NotificationCenter.default.removeObserver(self, name: .reachabilityChanged, object: nil)
+		reachability = nil
+	}
+	
+	func updateLabelColourWhenReachable(_ reachability: Reachability) {
+		print("\(reachability.description) - \(reachability.connection)")
+		if reachability.connection == .wifi {
+			self.networkStatus.textColor = .green
+		} else {
+			self.networkStatus.textColor = .blue
+		}
+		
+		self.networkStatus.text = "\(reachability.connection)"
+	}
+	
+	func updateLabelColourWhenNotReachable(_ reachability: Reachability) {
+		print("\(reachability.description) - \(reachability.connection)")
+		
+		self.networkStatus.textColor = .red
+		
+		self.networkStatus.text = "\(reachability.connection)"
+	}
+	
+	@objc func reachabilityChanged(_ note: Notification) {
+		let reachability = note.object as! Reachability
+		
+		if reachability.connection != .none {
+			updateLabelColourWhenReachable(reachability)
+		} else {
+			updateLabelColourWhenNotReachable(reachability)
+		}
 	}
 }
 

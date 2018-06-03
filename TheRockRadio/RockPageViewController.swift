@@ -11,10 +11,11 @@ import UIKit
 class RockPageViewController: UIPageViewController {
 
 	private(set) lazy var orderedViewControllers: [UIViewController] = { // Website RecentlyPlayed Logger
-		return [self.newViewControllerWith(name: "Logger"),
-				self.newViewControllerWith(name: "RSS"),
-				self.newViewControllerWith(name: "Website"),
-				self.newViewControllerWith(name: "RecentlyPlayed")
+		return [
+//			self.newViewControllerWith(name: "Logger"),
+			self.newViewControllerWith(name: "Website"),
+			self.newViewControllerWith(name: "RSS"),
+			self.newViewControllerWith(name: "RecentlyPlayed")
 		]
 	}()
 	
