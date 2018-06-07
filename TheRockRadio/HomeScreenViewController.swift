@@ -3,7 +3,7 @@
 //  TheRockRadio
 //
 //  Created by Michael Gillen on 3/12/18.
-//  Copyright © 2018 paradigm-performance. All rights reserved.
+//  Copyright © 2018 On The Move Software. All rights reserved.
 //
 
 import UIKit
@@ -20,6 +20,79 @@ var avPlayerVCisReady = true
 var assetIsReady = false
 var isReachable = false
 var retryCount = 0
+var playbackStalled = false
+
+// JSON structure
+struct Collaborator: Decodable {
+	let id: String
+	let name: String
+	let status: String
+}
+
+struct Source: Decodable {
+	let type: String
+	let collaborator: Collaborator
+	let relay: String?
+}
+
+struct CurrentTrack: Decodable {
+	let title: String
+	let start_time: String
+	let artwork_url: URL
+	let artwork_url_large: URL
+}
+
+struct History: Decodable {
+	var title: String
+}
+
+struct Outputs: Decodable {
+	let name: String
+	let format: String
+	let bitrate: Int
+}
+
+public struct RadioJSON {
+	let status: String
+	let source: Source
+	let collaborators: [Collaborator]
+	let relays: [String]
+	let currentTrack: CurrentTrack
+	var history: [History]
+	let logoURL: URL
+	let streamingHostname: String
+	let outputs: [Outputs]
+}
+
+extension RadioJSON: Decodable {
+	
+	enum CodingKeys: String, CodingKey {
+		case status					= "status"
+		case source					= "source"
+		case collaborators			= "collaborators"
+		case relays					= "relays"
+		case current_track			= "current_track"
+		case history				= "history"
+		case logo_url				= "logo_url"
+		case streaming_hostname		= "streaming_hostname"
+		case outputs				= "outputs"
+	}
+	
+	public init(from decoder: Decoder) throws {
+		
+		let container 			= try decoder.container(keyedBy: CodingKeys.self)
+		
+		self.status 			= try container.decode(String.self,					forKey: .status)
+		self.source 			= try container.decode(Source.self,					forKey: .source)
+		self.collaborators	 	= try container.decode([Collaborator].self,			forKey: .collaborators)
+		self.relays 			= try container.decode([String].self,				forKey: .relays)
+		self.currentTrack 		= try container.decode(CurrentTrack.self,			forKey: .current_track)
+		self.history 			= try container.decode([History].self,				forKey: .history)
+		self.logoURL 			= try container.decode(URL.self,					forKey: .logo_url)
+		self.streamingHostname	= try container.decode(String.self,					forKey: .streaming_hostname)
+		self.outputs			= try container.decode([Outputs].self,				forKey: .outputs)
+	}
+}
 
 class HomeScreenViewController: UIViewController {
 
@@ -49,7 +122,7 @@ class HomeScreenViewController: UIViewController {
 	
     override func viewDidLoad() {
         super.viewDidLoad()
-		loggingText = loggingText.add(string: "viewDidLoad")
+//		loggingText = loggingText.add(string: "viewDidLoad")
 		
 		// Set AssetListTableViewController as the delegate for AssetPlaybackManager to recieve playback information.
 		AssetPlaybackManager.sharedManager.delegate = self
@@ -62,9 +135,11 @@ class HomeScreenViewController: UIViewController {
 
 		// handle interruptions
 		DispatchQueue.main.async {
+			// and another one: // AVPlayerItemPlaybackStalledNotification the call player.seekToTime(player.currentTime) instead of player.play()
 			notificationCenter.addObserver(self, selector: #selector(HomeScreenViewController.handleInterruption), name: .AVAudioSessionInterruption, object: AVAudioSession.sharedInstance)
 			notificationCenter.addObserver(self, selector: #selector(HomeScreenViewController.handleRouteChange), name: .AVAudioSessionRouteChange, object: nil)
 			notificationCenter.addObserver(self, selector: #selector(HomeScreenViewController.handleMediaReset), name: .AVAudioSessionMediaServicesWereReset, object: nil)
+			notificationCenter.addObserver(self, selector: #selector(HomeScreenViewController.handlePlaybackStalled), name: NSNotification.Name.AVPlayerItemPlaybackStalled, object: nil)
 		}
 		
 //		UIApplication.shared.beginReceivingRemoteControlEvents()
@@ -80,7 +155,7 @@ class HomeScreenViewController: UIViewController {
 	}
 
 	override func viewWillAppear(_ animated: Bool) {
-		loggingText = loggingText.add(string: "viewWillAppear")
+//		loggingText = loggingText.add(string: "viewWillAppear")
 		super.viewWillAppear(animated)
 //		NotificationCenter.default.post(name: NSNotification.Name("RestartStream"), object: nil)
 	}
@@ -106,7 +181,7 @@ class HomeScreenViewController: UIViewController {
 		super.prepare(for: segue, sender: sender)
 		if segue.identifier == HomeScreenViewController.presentPlayerViewControllerSegueID {
 			guard let seguePlayerViewController = segue.destination as? AVPlayerViewController else { return }
-			loggingText = loggingText.add(string: "prepare(for segue: AVPlayerViewController")
+//			loggingText = loggingText.add(string: "prepare(for segue: AVPlayerViewController")
 			//Grab a reference for the destinationViewController to use in later delegate callbacks from
 			//AssetPlaybackManager.
 			playerViewController = seguePlayerViewController
@@ -127,7 +202,6 @@ class HomeScreenViewController: UIViewController {
 			loggingText = loggingText.add(string: "restartStream avPlayerVCisReady NOT ready")
 			return
 		}
-		// if we have a player then try to hit the play button
 		guard playerViewController?.player != nil else {
 			loggingText = loggingText.add(string: "restartStream playerViewController?.player is nil")
 			loggingText = loggingText.add(string: "restartStream calling reloadURL")
@@ -135,8 +209,12 @@ class HomeScreenViewController: UIViewController {
 			return
 		}
 		loggingText = loggingText.add(string: "restartStream player.play()")
-		playerViewController?.player?.play()
-		getStationPlaylistInfo()
+		if playbackStalled {
+			reloadURL()
+		} else {
+			playerViewController?.player?.play()
+			getStationPlaylistInfo()
+		}
 	}
 	
 	@objc func reloadURL() {
@@ -154,31 +232,33 @@ class HomeScreenViewController: UIViewController {
 		let stream = StreamListManager.shared.streams.first
 		let asset = Asset.init(stream: stream!, urlAsset: urlAsset)
 		AssetPlaybackManager.sharedManager.setAssetForPlayback(asset)
+		playbackStalled = false
 	}
 
 	@objc func handleNewSongNotification(notification: NSNotification) {
-		loggingText = loggingText.add(string: "handleNewSongNotification")
+//		loggingText = loggingText.add(string: "handleNewSongNotification")
 		getStationPlaylistInfo()
 	}
 	
 	func getStationPlaylistInfo() {
-		loggingText = loggingText.add(string: "getStationPlaylistInfo")
+//		loggingText = loggingText.add(string: "getStationPlaylistInfo")
 		let radioURL = URL.init(string: HomeScreenViewController.playlistURL)
 		let task = URLSession.shared.dataTask(with: radioURL!) { data, response, error in
 			if let error = error {
-				self.handleClientError(error)
+				print(error)
 				return
 			}
 			guard let httpResponse = response as? HTTPURLResponse,
 				(200...299).contains(httpResponse.statusCode) else {
-					self.handleServerError(response)
+					print(response ?? "Fred")
 					return
 			}
 			if let mimeType = httpResponse.mimeType, mimeType == "application/json",
 				let data = data {
 				do {
-					let jsonData = try JSONSerialization.jsonObject(with: data, options: []) as! [String : Any]
-					self.processJSON(jsonData)
+					let decoder = JSONDecoder()
+					let radioData = try decoder.decode(RadioJSON.self, from: data)
+					self.processJSON(radioData)
 				}
 				catch {
 					print(error)
@@ -188,130 +268,229 @@ class HomeScreenViewController: UIViewController {
 		task.resume()
 	}
 	
-	func processJSON(_ jsonData: [String : Any]) {
-		for dict in jsonData {
-			if dict.key == "current_track" {
-				guard let currentTrackDict = dict.value as? [String : Any] else { return }
-				if let title = currentTrackDict["title"] as? String {
-					
-					let tempString = title
-//					let tempString = "Fred" // For testing
-					if tempString.contains("-") {
-						let separator = tempString.index(of: "-")!
-						let artistSlice = tempString[..<separator]
-						if separator < tempString.endIndex {
-							let afterSeparator = tempString.index(after: separator)
-							if afterSeparator < tempString.endIndex {
-								let next = tempString.index(after: afterSeparator)
-								let titleSlice = tempString.suffix(from: next)
-								currentTrackTitle = String(titleSlice)
-								currentTrackTitle = currentTrackTitle + "\n"
-								currentTrackArtist = String(artistSlice)
-							}
-							else {
-								currentTrackTitle = tempString + "\n"
-								currentTrackArtist = HomeScreenViewController.defaultTrackArtist
-							}
-						}
-						else {
-							currentTrackTitle = tempString + "\n"
-							currentTrackArtist = HomeScreenViewController.defaultTrackArtist
-						}
-					}
-					else {
-						currentTrackTitle = tempString + "\n"
-						currentTrackArtist = HomeScreenViewController.defaultTrackArtist
-					}
-				}
-				else {
-					currentTrackTitle = HomeScreenViewController.defaultTrackTitle
-					currentTrackArtist = HomeScreenViewController.defaultTrackArtist
-				}
-				
-//$TODO: Needed?				let start_time = currentTrackDict["start_time"] as! String
-				if currentTrackTitle == "Unknown" || currentTrackTitle == "" {
-					currentTrackTitle = HomeScreenViewController.defaultTrackTitle
-					currentTrackArtist = HomeScreenViewController.defaultTrackArtist
-				}
-				
-				if currentTrackArtist == "" {
-					currentTrackArtist = HomeScreenViewController.defaultTrackArtist
-				}
-				
-				let titleAttributes: [NSAttributedStringKey : Any] = [
-					NSAttributedStringKey.foregroundColor : UIColor.black,
-					NSAttributedStringKey.font : UIFont.systemFont(ofSize: 30)
-				]
-				let displayString = NSMutableAttributedString.init(string: currentTrackTitle, attributes: titleAttributes)
-				let artistAttributes = [
-					NSAttributedStringKey.foregroundColor : UIColor.red,
-					NSAttributedStringKey.font : UIFont.systemFont(ofSize: 20)
-				]
-				displayString.append(NSAttributedString.init(string: currentTrackArtist, attributes: artistAttributes))
-				
-				DispatchQueue.main.async {
-					self.songLabel.attributedText = displayString
-				}
-				updateNowPlaying()
-				
-				if let artwork_url = currentTrackDict["artwork_url"] as? String,
-					let artworkURL = URL.init(string: artwork_url) {
-					if artwork_url.contains("images.radio.co/station_logos/s96fbbec3a") {
-						DispatchQueue.main.async {
-							self.albumArtwork.image = HomeScreenViewController.defaultAlbumArtwork
-						}
-					} else {
-
-						let task = URLSession.shared.dataTask(with: artworkURL) { data, response, error in
-							if let error = error {
-								self.handleClientError(error)
-								return
-							}
-							guard let httpResponse = response as? HTTPURLResponse,
-								(200...299).contains(httpResponse.statusCode) else {
-									self.handleServerError(response)
-									return
-							}
-							
-							if let data = data {
-								let dataImage = UIImage.init(data: data)
-								DispatchQueue.main.async {
-									self.albumArtwork.image = dataImage
-								}
-							}
-						}
-						task.resume()
-					}
-				}
-				else {
-					DispatchQueue.main.async {
-						self.albumArtwork.image = HomeScreenViewController.defaultAlbumArtwork
-					}
-				}
-			}
-			else if dict.key == "history" {
-// $TODO: Fix when we can
-//				let historyArray = dict.value as! [Any]
-//				var songArray: [[String: Any]] = [[:]]
-//				for track in historyArray {
-////					print(track)
-//					let x = track as! [String : Any]
-//					let song = x["title"] as? String
-//					print(song)
-//					songArray.append(x)
-//				}
-//				print("test")
-//				NotificationCenter.default.post(name: NSNotification.Name(rawValue: "History"), object: nil, userInfo: dict.value as? [AnyHashable : Any])
-				NotificationCenter.default.post(name: NSNotification.Name(rawValue: "History"), object: nil, userInfo: jsonData)
-			}
-		}
+	func sliceJSONTitle(title: String) -> (String, String) {
+		var trackTitle = ""
+		var trackArtist = ""
+		
+		return (trackTitle, trackArtist)
 	}
 	
+	func processJSON(_ jsonData: RadioJSON) {
+		
+		currentTrackTitle = jsonData.currentTrack.title
+		if currentTrackTitle == "Unknown" || currentTrackTitle == "" {
+			currentTrackTitle = HomeScreenViewController.defaultTrackTitle
+			currentTrackArtist = HomeScreenViewController.defaultTrackArtist
+		}
+		
+		currentTrackArtist = jsonData.currentTrack.title
+		if currentTrackArtist == "" {
+			currentTrackArtist = HomeScreenViewController.defaultTrackArtist
+		}
+		
+		let titleAttributes: [NSAttributedStringKey : Any] = [
+			NSAttributedStringKey.foregroundColor : UIColor.black,
+			NSAttributedStringKey.font : UIFont.systemFont(ofSize: 30)
+		]
+		let displayString = NSMutableAttributedString.init(string: currentTrackTitle, attributes: titleAttributes)
+		let artistAttributes = [
+			NSAttributedStringKey.foregroundColor : UIColor.red,
+			NSAttributedStringKey.font : UIFont.systemFont(ofSize: 20)
+		]
+		displayString.append(NSAttributedString.init(string: currentTrackArtist, attributes: artistAttributes))
+		
+		DispatchQueue.main.async {
+			self.songLabel.attributedText = displayString
+		}
+		updateNowPlaying()
+		
+		if jsonData.currentTrack.artwork_url.absoluteString.contains("images.radio.co/station_logos/s96fbbec3a") {
+			DispatchQueue.main.async {
+				self.albumArtwork.image = HomeScreenViewController.defaultAlbumArtwork
+			}
+		} else {
+			
+			let task = URLSession.shared.dataTask(with: jsonData.currentTrack.artwork_url) { data, response, error in
+				if let error = error {
+					self.handleClientError(error)
+					return
+				}
+				guard let httpResponse = response as? HTTPURLResponse,
+					(200...299).contains(httpResponse.statusCode) else {
+						self.handleServerError(response)
+						return
+				}
+				
+				if let data = data {
+					let dataImage = UIImage.init(data: data)
+					DispatchQueue.main.async {
+						self.albumArtwork.image = dataImage
+					}
+				}
+			}
+			task.resume()
+		}
+		NotificationCenter.default.post(name: NSNotification.Name(rawValue: "History"), object: nil, userInfo: ["History" : jsonData.history])
+	}
+
+
+//	func OLDgetStationPlaylistInfo() {
+////		loggingText = loggingText.add(string: "getStationPlaylistInfo")
+//		let radioURL = URL.init(string: HomeScreenViewController.playlistURL)
+//		let task = URLSession.shared.dataTask(with: radioURL!) { data, response, error in
+//			if let error = error {
+//				self.handleClientError(error)
+//				return
+//			}
+//			guard let httpResponse = response as? HTTPURLResponse,
+//				(200...299).contains(httpResponse.statusCode) else {
+//					self.handleServerError(response)
+//					return
+//			}
+//			if let mimeType = httpResponse.mimeType, mimeType == "application/json",
+//				let data = data {
+//				do {
+//					let jsonData = try JSONSerialization.jsonObject(with: data, options: []) as! [String : Any]
+//					self.processJSON(jsonData)
+//				}
+//				catch {
+//					print(error)
+//				}
+//			}
+//		}
+//		task.resume()
+//	}
+//
+//	func OLDprocessJSON(_ jsonData: [String : Any]) {
+//		for dict in jsonData {
+//			if dict.key == "current_track" {
+//				guard let currentTrackDict = dict.value as? [String : Any] else { return }
+//				if let title = currentTrackDict["title"] as? String {
+//
+//					let tempString = title
+////					let tempString = "Fred" // For testing
+//					if tempString.contains("-") {
+//						let separator = tempString.index(of: "-")!
+//						let artistSlice = tempString[..<separator]
+//						if separator < tempString.endIndex {
+//							let afterSeparator = tempString.index(after: separator)
+//							if afterSeparator < tempString.endIndex {
+//								let next = tempString.index(after: afterSeparator)
+//								let titleSlice = tempString.suffix(from: next)
+//								currentTrackTitle = String(titleSlice)
+//								currentTrackTitle = currentTrackTitle + "\n"
+//								currentTrackArtist = String(artistSlice)
+//							}
+//							else {
+//								currentTrackTitle = tempString + "\n"
+//								currentTrackArtist = HomeScreenViewController.defaultTrackArtist
+//							}
+//						}
+//						else {
+//							currentTrackTitle = tempString + "\n"
+//							currentTrackArtist = HomeScreenViewController.defaultTrackArtist
+//						}
+//					}
+//					else {
+//						currentTrackTitle = tempString + "\n"
+//						currentTrackArtist = HomeScreenViewController.defaultTrackArtist
+//					}
+//				}
+//				else {
+//					currentTrackTitle = HomeScreenViewController.defaultTrackTitle
+//					currentTrackArtist = HomeScreenViewController.defaultTrackArtist
+//				}
+//
+////$TODO: Needed?				let start_time = currentTrackDict["start_time"] as! String
+//				if currentTrackTitle == "Unknown" || currentTrackTitle == "" {
+//					currentTrackTitle = HomeScreenViewController.defaultTrackTitle
+//					currentTrackArtist = HomeScreenViewController.defaultTrackArtist
+//				}
+//
+//				if currentTrackArtist == "" {
+//					currentTrackArtist = HomeScreenViewController.defaultTrackArtist
+//				}
+//
+//				let titleAttributes: [NSAttributedStringKey : Any] = [
+//					NSAttributedStringKey.foregroundColor : UIColor.black,
+//					NSAttributedStringKey.font : UIFont.systemFont(ofSize: 30)
+//				]
+//				let displayString = NSMutableAttributedString.init(string: currentTrackTitle, attributes: titleAttributes)
+//				let artistAttributes = [
+//					NSAttributedStringKey.foregroundColor : UIColor.red,
+//					NSAttributedStringKey.font : UIFont.systemFont(ofSize: 20)
+//				]
+//				displayString.append(NSAttributedString.init(string: currentTrackArtist, attributes: artistAttributes))
+//
+//				DispatchQueue.main.async {
+//					self.songLabel.attributedText = displayString
+//				}
+//				updateNowPlaying()
+//
+//				if let artwork_url = currentTrackDict["artwork_url"] as? String,
+//					let artworkURL = URL.init(string: artwork_url) {
+//					if artwork_url.contains("images.radio.co/station_logos/s96fbbec3a") {
+//						DispatchQueue.main.async {
+//							self.albumArtwork.image = HomeScreenViewController.defaultAlbumArtwork
+//						}
+//					} else {
+//
+//						let task = URLSession.shared.dataTask(with: artworkURL) { data, response, error in
+//							if let error = error {
+//								self.handleClientError(error)
+//								return
+//							}
+//							guard let httpResponse = response as? HTTPURLResponse,
+//								(200...299).contains(httpResponse.statusCode) else {
+//									self.handleServerError(response)
+//									return
+//							}
+//
+//							if let data = data {
+//								let dataImage = UIImage.init(data: data)
+//								DispatchQueue.main.async {
+//									self.albumArtwork.image = dataImage
+//								}
+//							}
+//						}
+//						task.resume()
+//					}
+//				}
+//				else {
+//					DispatchQueue.main.async {
+//						self.albumArtwork.image = HomeScreenViewController.defaultAlbumArtwork
+//					}
+//				}
+//			}
+//			else if dict.key == "history" {
+//// $TODO: Fix when we can
+////				let historyArray = dict.value as! [Any]
+////				var songArray: [[String: Any]] = [[:]]
+////				for track in historyArray {
+//////					print(track)
+////					let x = track as! [String : Any]
+////					let song = x["title"] as? String
+////					print(song)
+////					songArray.append(x)
+////				}
+////				print("test")
+////				NotificationCenter.default.post(name: NSNotification.Name(rawValue: "History"), object: nil, userInfo: dict.value as? [AnyHashable : Any])
+//				NotificationCenter.default.post(name: NSNotification.Name(rawValue: "History"), object: nil, userInfo: jsonData)
+//			}
+//		}
+//	}
+	
 	func updateNowPlaying() {
-		loggingText = loggingText.add(string: "updateNowPlaying")
+//		loggingText = loggingText.add(string: "updateNowPlaying")
 		// Set Metadata to be Displayed in Now Playing Info Center
 		let playerRate = playerViewController?.player?.rate ?? 0.0
 		let infoCenter = MPNowPlayingInfoCenter.default()
+		if currentTrackTitle == "" {
+			currentTrackTitle = HomeScreenViewController.defaultTrackTitle
+		}
+		if currentTrackArtist == "" {
+			currentTrackArtist = HomeScreenViewController.defaultTrackArtist
+		}
 		infoCenter.nowPlayingInfo = [MPMediaItemPropertyTitle: currentTrackTitle,
 									 MPMediaItemPropertyArtist: currentTrackArtist,
 									 MPNowPlayingInfoPropertyDefaultPlaybackRate: 1,
@@ -329,10 +508,10 @@ class HomeScreenViewController: UIViewController {
 	}
 	
 	func handleClientError(_ error: Error) {
-		loggingText = loggingText.add(string: "handleClientError")
+//		loggingText = loggingText.add(string: "handleClientError")
 }
 	func handleServerError(_ response: URLResponse?) {
-		loggingText = loggingText.add(string: "handleServerError")
+//		loggingText = loggingText.add(string: "handleServerError")
 	}
 
 	@objc func handleInterruption(notification: Notification) { // kAudioSessionProperty_ServerDied
@@ -360,8 +539,13 @@ class HomeScreenViewController: UIViewController {
 					loggingText = loggingText.add(string: "Interruption Ended")
 
 					if playerViewController.player?.rate == 0.0 {
-						playerViewController.player?.play()
-						loggingText = loggingText.add(string: "Interruption play()")
+						if playbackStalled {
+							reloadURL()
+						} else {
+							playerViewController.player?.play() // $TODO: work around
+//							playerViewController.player?.seek(to: (playerViewController.player?.currentTime())!)
+							loggingText = loggingText.add(string: "Interruption play()")
+						}
 					}
 				} else {
 					// Interruption Ended - playback should NOT resume
@@ -386,11 +570,15 @@ class HomeScreenViewController: UIViewController {
 			// do not automatically start playing.
 			loggingText = loggingText.add(string: "handleRouteChange newDeviceAvailable")
 
-//			let session = AVAudioSession.sharedInstance()
+			let session = AVAudioSession.sharedInstance()
 //			for output in session.currentRoute.outputs where output.portType == AVAudioSessionPortHeadphones {
 //				headphonesConnected = true
 //				break
 //			}
+			for output in session.currentRoute.outputs {
+				loggingText = loggingText.add(string: "handleRouteChange output = \(output.portType)")
+				break
+			}
 		case .oldDeviceUnavailable:
 			loggingText = loggingText.add(string: "handleRouteChange oldDeviceUnavailable")
 
@@ -416,10 +604,17 @@ class HomeScreenViewController: UIViewController {
 	}
 
 	@objc
-	func handleRemoteControlEvent(notification: Notification) {
-		print("MJG ------------------------------------------------------------------->>> handleRemoteControlEvent")
-		loggingText = loggingText.add(string: "handleRemoteControlEvent")
+	func handlePlaybackStalled(notification: Notification) {
+		
+		loggingText = loggingText.add(string: "handlePlaybackStalled")
+		playbackStalled = true
 	}
+
+//	@objc
+//	func handleRemoteControlEvent(notification: Notification) {
+//		print("MJG ------------------------------------------------------------------->>> handleRemoteControlEvent")
+//		loggingText = loggingText.add(string: "handleRemoteControlEvent")
+//	}
 }
 
 extension HomeScreenViewController: AssetPlaybackDelegate {
@@ -472,11 +667,20 @@ extension HomeScreenViewController: AssetPlaybackDelegate {
 		let commandCenter = MPRemoteCommandCenter.shared()
 		commandCenter.playCommand.addTarget { (event) -> MPRemoteCommandHandlerStatus in
 			loggingText = loggingText.add(string: "commandCenter.playCommand")
-			if self.playerViewController?.player?.rate == 0.0 {
+			if playbackStalled {
+				self.reloadURL()
+			} else if self.playerViewController?.player?.rate == 0.0 {
+				
+				do {
+					try AVAudioSession.sharedInstance().setActive(true)
+				} catch  {
+					loggingText = loggingText.add(string: "AVAudioSession.sharedInstance().setActive(true) error = \(error)")
+				}
 //				if Reachability.isConnectedToNetwork() {
-					loggingText = loggingText.add(string: "commandCenter.playCommand connected to network")
+					loggingText = loggingText.add(string: "commandCenter.playCommand play()")
 					DispatchQueue.main.async {
-						self.playerViewController?.player?.play()
+						self.playerViewController?.player?.play() // $TODO: work-around
+//						self.playerViewController?.player?.seek(to: (self.playerViewController?.player?.currentTime())!)
 					}
 //				} else {
 //					loggingText = loggingText.add(string: "commandCenter.playCommand NOT connected to network")

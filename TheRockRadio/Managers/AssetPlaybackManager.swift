@@ -94,7 +94,7 @@ class AssetPlaybackManager: NSObject {
             urlAssetObserver.invalidate()
         }
         didSet {
-			loggingText = loggingText.add(string: "var asset didSet")
+//			loggingText = loggingText.add(string: "var asset didSet")
             if let asset = asset {
                 urlAssetObserver = asset.urlAsset.observe(\AVURLAsset.isPlayable, options: [.new, .initial]) { [weak self] (urlAsset, _) in
                     guard let strongSelf = self, urlAsset.isPlayable == true else { return }
@@ -106,7 +106,7 @@ class AssetPlaybackManager: NSObject {
 						strongSelf.player.addObserver(strongSelf, forKeyPath: "status", options: [.new], context: &PlayerContext)
 						strongSelf.player.addObserver(strongSelf, forKeyPath: "rate", options: [.new], context: &PlayerRate)
 					}
-					loggingText = loggingText.add(string: "var asset didSet new PlayerItem")
+//					loggingText = loggingText.add(string: "var asset didSet new PlayerItem")
                 }
             }
             else {
@@ -142,7 +142,7 @@ class AssetPlaybackManager: NSObject {
 //			return
 //		}
 		if context == &TimedMetadataContext {
-			loggingText = loggingText.add(string: "observeValue TimedMetadataContext")
+//			loggingText = loggingText.add(string: "observeValue TimedMetadataContext")
 			guard let observedObject: AVPlayerItem = object as? AVPlayerItem else { return }
 			guard (observedObject.timedMetadata != nil) else { return }
 			for metadata in observedObject.timedMetadata! {
@@ -151,7 +151,7 @@ class AssetPlaybackManager: NSObject {
 				}
 			}
 		} else if context == &PlayerContext {
-			loggingText = loggingText.add(string: "observeValue PlayerContext")
+//			loggingText = loggingText.add(string: "observeValue PlayerContext")
 			guard let thePlayer: AVPlayer = object as? AVPlayer else {
 				loggingText = loggingText.add(string: "observeValue PlayerContext could not get object as AVPlayer")
 				return
@@ -176,7 +176,7 @@ class AssetPlaybackManager: NSObject {
      and handle KVO cleanup.
      */
     func setAssetForPlayback(_ asset: Asset?) {
-		loggingText = loggingText.add(string: "setAssetForPlayback")
+//		loggingText = loggingText.add(string: "setAssetForPlayback")
         self.asset = asset
     }	
 }

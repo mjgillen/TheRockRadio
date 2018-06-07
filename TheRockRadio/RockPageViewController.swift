@@ -3,7 +3,7 @@
 //  TheRockRadio
 //
 //  Created by Michael Gillen on 4/28/18.
-//  Copyright © 2018 paradigm-performance. All rights reserved.
+//  Copyright © 2018 On The Move Software. All rights reserved.
 //
 
 import UIKit
@@ -12,7 +12,7 @@ class RockPageViewController: UIPageViewController {
 
 	private(set) lazy var orderedViewControllers: [UIViewController] = { // Website RecentlyPlayed Logger
 		return [
-//			self.newViewControllerWith(name: "Logger"),
+			self.newViewControllerWith(name: "Logger"),
 			self.newViewControllerWith(name: "Website"),
 			self.newViewControllerWith(name: "RSS"),
 			self.newViewControllerWith(name: "RecentlyPlayed")

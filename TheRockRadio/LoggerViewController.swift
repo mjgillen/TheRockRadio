@@ -3,7 +3,7 @@
 //  TheRockRadio
 //
 //  Created by Michael Gillen on 5/27/18.
-//  Copyright © 2018 paradigm-performance. All rights reserved.
+//  Copyright © 2018 On The Move Software. All rights reserved.
 //
 
 import UIKit

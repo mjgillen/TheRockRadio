@@ -3,7 +3,7 @@
 //  TheRockRadio
 //
 //  Created by Michael Gillen on 3/17/18.
-//  Copyright © 2018 paradigm-performance. All rights reserved.
+//  Copyright © 2018 On The Move Software. All rights reserved.
 //
 
 import UIKit
@@ -35,11 +35,11 @@ class RecentlyPlayedViewController: UIViewController {
 		titleAttributes[NSAttributedStringKey.font] = UIFont.systemFont(ofSize: 18)
 		titleAttributes[NSAttributedStringKey.foregroundColor] = UIColor.blue
 		for dict in historyDict {
-			if dict.key == "history" {
+			if dict.key == "History" {
 				let historyArray = dict.value as! [Any]
 				for track in historyArray {
-					let x = track as! [String : Any]
-					var song = x["title"] as! String
+					let historyTrack = track as! History
+					var song = historyTrack.title
 					if !song.contains("KEBF") {
 						song = song + "\n"
 						playlist.append(NSAttributedString.init(string: song, attributes: titleAttributes))

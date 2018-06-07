@@ -3,16 +3,15 @@
 //  TheRockRadio
 //
 //  Created by Michael Gillen on 5/28/18.
-//  Copyright © 2018 paradigm-performance. All rights reserved.
+//  Copyright © 2018 On The Move Software. All rights reserved.
 //
 
 import UIKit
 
 struct rssCell {
-	var item = "item"
-	var title = "Title"
+	var title = "title"
 	var link = "link"
-	var description = "description of the new event"
+	var description = "description"
 	var pubDate = "pubDate"
 	var guid = "guid"
 	var read = false
@@ -32,7 +31,7 @@ extension RSSTableViewController: XMLParserDelegate {
 		switch elementName {
 			
 		case "item":
-			currentElement = .item
+			break
 		case "title":
 			xTitle = ""
 			currentElement = .title
@@ -46,6 +45,7 @@ extension RSSTableViewController: XMLParserDelegate {
 			xPubDate = ""
 			currentElement = .pubDate
 		case "guid":
+			xGUID = ""
 			currentElement = .guid
 		default:
 			break
@@ -61,16 +61,19 @@ extension RSSTableViewController: XMLParserDelegate {
 			break
 		case "link":
 			break
-		case "description": // , "pubDate":
+		case "description":
+			break
+		case "pubDate":
+			break
+		case "guid":
 			var newEntry = rssCell()
 			newEntry.title = xTitle
 			newEntry.link = xLink
 			newEntry.description = xDescription
 			newEntry.pubDate = xPubDate
+			newEntry.guid = xGUID
 			rssArray.append(newEntry)
 			resetEntry()
-		case "guid":
-			break
 		default:
 			break
 		}
@@ -81,6 +84,7 @@ extension RSSTableViewController: XMLParserDelegate {
 		xLink = ""
 		xDescription = ""
 		xPubDate = ""
+		xGUID = ""
 	}
 	
 	func parser(_ parser: XMLParser, foundCharacters string: String) {
@@ -96,13 +100,19 @@ extension RSSTableViewController: XMLParserDelegate {
 		case .pubDate:
 			xPubDate = xPubDate + string
 		case .guid:
+			xGUID = xGUID + string
 			break
 		default:
 			break
 		}
 	}
+	
 	func parserDidEndDocument(_ parser: XMLParser) {
 		self.tableView.reloadData()
+	}
+	
+	func parser(_ parser: XMLParser, parseErrorOccurred parseError: Error) {
+		print(parseError)
 	}
 }
 
@@ -113,14 +123,15 @@ class RSSTableViewController: UITableViewController {
 	var xLink = ""
 	var xDescription = ""
 	var xPubDate = ""
+	var xGUID = ""
 	var rssData: [String : String] = [:]
 	var rssArray: [rssCell] = []
 
-	static let rssFeedURL = "https://AnimalRadio.com/TheRockApp/TheRockCommunityRadio-WhatsUp.xml"
+	static let rssFeedURL = "https://www.animalradio.com/TheRockApp/TheRockCommunityRadio-WhatsUp.xml"
 
     override func viewDidLoad() {
         super.viewDidLoad()
-		readRSSFeed()
+		self.perform(#selector(readRSSFeed), with: nil, afterDelay: 0.10)
     }
 	
 	override func viewWillAppear(_ animated: Bool) {
@@ -128,10 +139,23 @@ class RSSTableViewController: UITableViewController {
 		self.tableView.reloadData()
 	}
 	
-	func readRSSFeed() {
+	@objc func readRSSFeed() {
+		
+//		do {
+//			let test = URL(string: RSSTableViewController.rssFeedURL)
+//			let result = try test?.checkResourceIsReachable()
+//			if !(result!) {
+//				print("error loading XML URL")
+//				return
+//			}
+//		} catch {
+//			print("error = \(error)")
+//			return
+//		}
+		
 		let parser = XMLParser(contentsOf: URL(string: RSSTableViewController.rssFeedURL)!)
 		parser?.delegate = self
-		parser?.shouldResolveExternalEntities = false
+		parser?.shouldResolveExternalEntities = true
 		parser?.parse()
 	}
 	
