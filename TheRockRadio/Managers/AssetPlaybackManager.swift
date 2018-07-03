@@ -11,7 +11,7 @@ import AVFoundation
 import MediaPlayer
 
 private var PlayerContext = 0
-private var PlayerRate = 0
+private var PlayerRateContext = 0
 private var TimedMetadataContext = 0
 
 class AssetPlaybackManager: NSObject {
@@ -94,7 +94,7 @@ class AssetPlaybackManager: NSObject {
             urlAssetObserver.invalidate()
         }
         didSet {
-//			loggingText = loggingText.add(string: "var asset didSet")
+			loggingText = loggingText.add(string: "var asset didSet")
             if let asset = asset {
                 urlAssetObserver = asset.urlAsset.observe(\AVURLAsset.isPlayable, options: [.new, .initial]) { [weak self] (urlAsset, _) in
                     guard let strongSelf = self, urlAsset.isPlayable == true else { return }
@@ -104,9 +104,9 @@ class AssetPlaybackManager: NSObject {
 					DispatchQueue.main.async {
 						strongSelf.playerItem?.addObserver(strongSelf, forKeyPath: "timedMetadata", options: [.new], context: &TimedMetadataContext)
 						strongSelf.player.addObserver(strongSelf, forKeyPath: "status", options: [.new], context: &PlayerContext)
-						strongSelf.player.addObserver(strongSelf, forKeyPath: "rate", options: [.new], context: &PlayerRate)
+						strongSelf.player.addObserver(strongSelf, forKeyPath: "rate", options: [.new], context: &PlayerRateContext)
 					}
-//					loggingText = loggingText.add(string: "var asset didSet new PlayerItem")
+					loggingText = loggingText.add(string: "var asset didSet new PlayerItem")
                 }
             }
             else {
@@ -114,6 +114,7 @@ class AssetPlaybackManager: NSObject {
                 player.replaceCurrentItem(with: nil)
                 readyForPlayback = false
 				assetIsReady = false
+				loggingText = loggingText.add(string: "var asset didSet FAILED")
 				// $TODO: put up an alert to try again.
             }
         }
@@ -137,12 +138,8 @@ class AssetPlaybackManager: NSObject {
 	
 	override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
 		
-//		if keyPath != "timedMetadata" {
-//			loggingText = loggingText.add(string: "not timedMetadata")
-//			return
-//		}
 		if context == &TimedMetadataContext {
-//			loggingText = loggingText.add(string: "observeValue TimedMetadataContext")
+			loggingText = loggingText.add(string: "observeValue TimedMetadataContext")
 			guard let observedObject: AVPlayerItem = object as? AVPlayerItem else { return }
 			guard (observedObject.timedMetadata != nil) else { return }
 			for metadata in observedObject.timedMetadata! {
@@ -150,8 +147,9 @@ class AssetPlaybackManager: NSObject {
 					NotificationCenter.default.post(name: NSNotification.Name(rawValue: "ObservedObjectSongName"), object: songName)
 				}
 			}
-		} else if context == &PlayerContext {
-//			loggingText = loggingText.add(string: "observeValue PlayerContext")
+		} else
+		if context == &PlayerContext {
+			//			loggingText = loggingText.add(string: "observeValue PlayerContext")
 			guard let thePlayer: AVPlayer = object as? AVPlayer else {
 				loggingText = loggingText.add(string: "observeValue PlayerContext could not get object as AVPlayer")
 				return
@@ -160,23 +158,26 @@ class AssetPlaybackManager: NSObject {
 			if status == .failed {
 				loggingText = loggingText.add(string: "observeValue PlayerContext status = .failed")
 			}
-		} else if context == &PlayerRate {
+		} else if context == &PlayerRateContext {
 			guard let thePlayer: AVPlayer = object as? AVPlayer else {
-				loggingText = loggingText.add(string: "observeValue PlayerContext could not get object as AVPlayer")
+				loggingText = loggingText.add(string: "observeValue PlayerRate could not get object as AVPlayer")
 				return
 			}
 			let playerRate = thePlayer.rate
-			loggingText = loggingText.add(string: "observeValue PlayerContext rate = \(playerRate)")
+			loggingText = loggingText.add(string: "observeValue PlayerRate rate = \(playerRate)")
+			if playerRate == 0.0 {
+				lastTimePaused = Date.timeIntervalSinceReferenceDate
+			}
 		}
 	}
-    
+	
     /**
      Replaces the currently playing `Asset`, if any, with a new `Asset`. If nil
      is passed, `AssetPlaybackManager` will handle unloading the existing `Asset`
      and handle KVO cleanup.
      */
     func setAssetForPlayback(_ asset: Asset?) {
-//		loggingText = loggingText.add(string: "setAssetForPlayback")
+		loggingText = loggingText.add(string: "setAssetForPlayback")
         self.asset = asset
     }	
 }

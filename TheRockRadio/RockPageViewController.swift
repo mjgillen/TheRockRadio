@@ -15,7 +15,7 @@ class RockPageViewController: UIPageViewController {
 			self.newViewControllerWith(name: "Logger"),
 			self.newViewControllerWith(name: "Website"),
 			self.newViewControllerWith(name: "RSS"),
-			self.newViewControllerWith(name: "RecentlyPlayed")
+//			self.newViewControllerWith(name: "RecentlyPlayed"),
 		]
 	}()
 	
@@ -38,7 +38,6 @@ class RockPageViewController: UIPageViewController {
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
     }
 }
 

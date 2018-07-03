@@ -59,8 +59,10 @@ class WebsiteViewController: UIViewController {
 			mailDelegate = MailDelegate()
 			let mail = MFMailComposeViewController()
 			mail.mailComposeDelegate = self.mailDelegate
-			let appVersion = Bundle.main.infoDictionary!["CFBundleVersion"] as! String
-			mail.setToRecipients(["mmgillen@me.com"])
+			let versionNumber = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
+			let buildNumber = Bundle.main.infoDictionary!["CFBundleVersion"] as! String
+			let appVersion = versionNumber + buildNumber
+			mail.setToRecipients(["YourVoice@CentralCoastRadio.org"])
 			mail.setSubject("The Rock App v\(appVersion) Feedback")
 //			let deviceModel = UIDevice.current.model
 //			let systemVersion = UIDevice.current.systemVersion
@@ -86,7 +88,7 @@ class WebsiteViewController: UIViewController {
 			
 			present(mail, animated: true)
 		} else {
-			let email = "mmgillen@me.com"
+			let email = "YourVoice@CentralCoastRadio.org"
 			if let url = URL(string: "mailto:\(email)") {
 				UIApplication.shared.open(url)
 			}

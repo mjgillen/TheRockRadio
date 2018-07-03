@@ -20,7 +20,8 @@ var avPlayerVCisReady = true
 var assetIsReady = false
 var isReachable = false
 var retryCount = 0
-var playbackStalled = false
+//var playbackStalled = false
+var lastTimePaused: TimeInterval = Date.timeIntervalSinceReferenceDate
 
 // JSON structure
 struct Collaborator: Decodable {
@@ -97,20 +98,21 @@ extension RadioJSON: Decodable {
 class HomeScreenViewController: UIViewController {
 
 	static let presentPlayerViewControllerSegueID = "PresentPlayerViewControllerSegueIdentifier"
-	static let defaultTrackTitle = "KEBF/KZSR\n"
-	static let defaultTrackArtist = "97.3 / 107.9 The Rock Radio"
-	static let defaultAlbumArtwork: UIImage = #imageLiteral(resourceName: "RockLogo")
-	static let streamingURL = "https://streaming.radio.co/s96fbbec3a/listen"
-	static let playlistURL = "https://public.radio.co/stations/s96fbbec3a/status"
-	
 	
 	fileprivate var playerViewController: AVPlayerViewController?
 	
+	// Common
+	let nowPlayingManager = NowPlayingManager()
+	
 	// UI in the player window
 	var songLabel: UILabel!
-	var currentTrackTitle = HomeScreenViewController.defaultTrackTitle
-	var currentTrackArtist = HomeScreenViewController.defaultTrackArtist
+	var currentTrackTitle = Common.defaultTrackTitle
+	var currentTrackArtist = Common.defaultTrackArtist
+	var currentAlbumArtwork: UIImage = Common.defaultAlbumArtwork
 	var albumArtwork: UIImageView!
+	var albumArtworkURLString = Common.defaultAlbumArtworkURLString
+	
+	var mediaItemArtwork: MPMediaItemArtwork?
 	
 	// Reachability
 	var reachability: Reachability?
@@ -124,6 +126,8 @@ class HomeScreenViewController: UIViewController {
         super.viewDidLoad()
 //		loggingText = loggingText.add(string: "viewDidLoad")
 		
+		nowPlayingManager.updateNowPlayingWith(title: Common.defaultTrackTitle, artist: Common.defaultTrackArtist, artWork: Common.defaultAlbumArtwork)
+
 		// Set AssetListTableViewController as the delegate for AssetPlaybackManager to recieve playback information.
 		AssetPlaybackManager.sharedManager.delegate = self
 		
@@ -139,7 +143,7 @@ class HomeScreenViewController: UIViewController {
 			notificationCenter.addObserver(self, selector: #selector(HomeScreenViewController.handleInterruption), name: .AVAudioSessionInterruption, object: AVAudioSession.sharedInstance)
 			notificationCenter.addObserver(self, selector: #selector(HomeScreenViewController.handleRouteChange), name: .AVAudioSessionRouteChange, object: nil)
 			notificationCenter.addObserver(self, selector: #selector(HomeScreenViewController.handleMediaReset), name: .AVAudioSessionMediaServicesWereReset, object: nil)
-			notificationCenter.addObserver(self, selector: #selector(HomeScreenViewController.handlePlaybackStalled), name: NSNotification.Name.AVPlayerItemPlaybackStalled, object: nil)
+//			notificationCenter.addObserver(self, selector: #selector(HomeScreenViewController.handlePlaybackStalled), name: NSNotification.Name.AVPlayerItemPlaybackStalled, object: nil)
 		}
 		
 //		UIApplication.shared.beginReceivingRemoteControlEvents()
@@ -187,7 +191,7 @@ class HomeScreenViewController: UIViewController {
 			playerViewController = seguePlayerViewController
 			
 			// Load the new Asset to playback into AssetPlaybackManager.
-			let urlAsset = AVURLAsset.init(url: URL.init(string: HomeScreenViewController.streamingURL)!)
+			let urlAsset = AVURLAsset.init(url: URL.init(string: Common.streamingURL)!)
 			let stream = StreamListManager.shared.streams.first
 			let asset = Asset.init(stream: stream!, urlAsset: urlAsset)
 			AssetPlaybackManager.sharedManager.setAssetForPlayback(asset)
@@ -209,12 +213,9 @@ class HomeScreenViewController: UIViewController {
 			return
 		}
 		loggingText = loggingText.add(string: "restartStream player.play()")
-		if playbackStalled {
-			reloadURL()
-		} else {
-			playerViewController?.player?.play()
-			getStationPlaylistInfo()
-		}
+//		playerViewController?.player?.play()
+		checkAndPlay()
+//			getStationPlaylistInfo()
 	}
 	
 	@objc func reloadURL() {
@@ -226,13 +227,20 @@ class HomeScreenViewController: UIViewController {
 			return
 		}
 
+		// Restart the Audio Session
+		do {
+			try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback)
+			try AVAudioSession.sharedInstance().setActive(true)
+		} catch  {
+			loggingText = loggingText.add(string: "AVAudioSession.sharedInstance().setCategory error = \(error)")
+		}
+		
 		// Load the Asset to playback into AssetPlaybackManager.
 		loggingText = loggingText.add(string: "reloadURL reloading asset")
-		let urlAsset = AVURLAsset.init(url: URL.init(string: HomeScreenViewController.streamingURL)!)
+		let urlAsset = AVURLAsset.init(url: URL.init(string: Common.streamingURL)!)
 		let stream = StreamListManager.shared.streams.first
 		let asset = Asset.init(stream: stream!, urlAsset: urlAsset)
 		AssetPlaybackManager.sharedManager.setAssetForPlayback(asset)
-		playbackStalled = false
 	}
 
 	@objc func handleNewSongNotification(notification: NSNotification) {
@@ -242,7 +250,7 @@ class HomeScreenViewController: UIViewController {
 	
 	func getStationPlaylistInfo() {
 //		loggingText = loggingText.add(string: "getStationPlaylistInfo")
-		let radioURL = URL.init(string: HomeScreenViewController.playlistURL)
+		let radioURL = URL.init(string: Common.playlistURL)
 		let task = URLSession.shared.dataTask(with: radioURL!) { data, response, error in
 			if let error = error {
 				print(error)
@@ -268,31 +276,24 @@ class HomeScreenViewController: UIViewController {
 		task.resume()
 	}
 	
-	func sliceJSONTitle(title: String) -> (String, String) {
-		var trackTitle = ""
-		var trackArtist = ""
-		
-		return (trackTitle, trackArtist)
-	}
-	
 	func processJSON(_ jsonData: RadioJSON) {
 		
-		currentTrackTitle = jsonData.currentTrack.title
+//		currentTrackTitle = jsonData.currentTrack.title
+		(currentTrackTitle, currentTrackArtist) = sliceJSONSongString(songString: jsonData.currentTrack.title)
 		if currentTrackTitle == "Unknown" || currentTrackTitle == "" {
-			currentTrackTitle = HomeScreenViewController.defaultTrackTitle
-			currentTrackArtist = HomeScreenViewController.defaultTrackArtist
+			currentTrackTitle = Common.defaultTrackTitle
+			currentTrackArtist = Common.defaultTrackArtist
 		}
 		
-		currentTrackArtist = jsonData.currentTrack.title
 		if currentTrackArtist == "" {
-			currentTrackArtist = HomeScreenViewController.defaultTrackArtist
+			currentTrackArtist = Common.defaultTrackArtist
 		}
 		
 		let titleAttributes: [NSAttributedStringKey : Any] = [
 			NSAttributedStringKey.foregroundColor : UIColor.black,
 			NSAttributedStringKey.font : UIFont.systemFont(ofSize: 30)
 		]
-		let displayString = NSMutableAttributedString.init(string: currentTrackTitle, attributes: titleAttributes)
+		let displayString = NSMutableAttributedString.init(string: currentTrackTitle + "\n", attributes: titleAttributes)
 		let artistAttributes = [
 			NSAttributedStringKey.foregroundColor : UIColor.red,
 			NSAttributedStringKey.font : UIFont.systemFont(ofSize: 20)
@@ -302,14 +303,18 @@ class HomeScreenViewController: UIViewController {
 		DispatchQueue.main.async {
 			self.songLabel.attributedText = displayString
 		}
-		updateNowPlaying()
-		
+		DispatchQueue.main.async {
+			self.updateNowPlaying()
+		}
+
 		if jsonData.currentTrack.artwork_url.absoluteString.contains("images.radio.co/station_logos/s96fbbec3a") {
 			DispatchQueue.main.async {
-				self.albumArtwork.image = HomeScreenViewController.defaultAlbumArtwork
+				self.albumArtwork.image = Common.defaultAlbumArtwork
+				self.currentAlbumArtwork = Common.defaultAlbumArtwork
+				self.albumArtworkURLString = Common.defaultAlbumArtworkURLString
 			}
 		} else {
-			
+			albumArtworkURLString = jsonData.currentTrack.artwork_url.absoluteString
 			let task = URLSession.shared.dataTask(with: jsonData.currentTrack.artwork_url) { data, response, error in
 				if let error = error {
 					self.handleClientError(error)
@@ -325,6 +330,7 @@ class HomeScreenViewController: UIViewController {
 					let dataImage = UIImage.init(data: data)
 					DispatchQueue.main.async {
 						self.albumArtwork.image = dataImage
+						self.currentAlbumArtwork = dataImage!
 					}
 				}
 			}
@@ -333,178 +339,92 @@ class HomeScreenViewController: UIViewController {
 		NotificationCenter.default.post(name: NSNotification.Name(rawValue: "History"), object: nil, userInfo: ["History" : jsonData.history])
 	}
 
+	func sliceJSONSongString(songString: String) -> (String, String) {
+		var trackTitle = ""
+		var trackArtist = ""
+		let stringSplit = songString.components(separatedBy: " - ")
+		switch stringSplit.count {
+		case 0,1:
+			trackTitle = stringSplit.first!
+		case 2:
+			trackTitle = stringSplit.first!
+			trackArtist = stringSplit.last!
+		default: // more than two
+			trackTitle = stringSplit.first!
+			for index in 1..<stringSplit.count {
+				if index == 1 {
+					trackArtist = trackArtist + stringSplit[index]
+				} else {
+					trackArtist = trackArtist + " - " + stringSplit[index]
+				}
+			}
+		}
+		return (trackTitle, trackArtist)
+	}
 
-//	func OLDgetStationPlaylistInfo() {
-////		loggingText = loggingText.add(string: "getStationPlaylistInfo")
-//		let radioURL = URL.init(string: HomeScreenViewController.playlistURL)
-//		let task = URLSession.shared.dataTask(with: radioURL!) { data, response, error in
-//			if let error = error {
-//				self.handleClientError(error)
-//				return
-//			}
-//			guard let httpResponse = response as? HTTPURLResponse,
-//				(200...299).contains(httpResponse.statusCode) else {
-//					self.handleServerError(response)
-//					return
-//			}
-//			if let mimeType = httpResponse.mimeType, mimeType == "application/json",
-//				let data = data {
-//				do {
-//					let jsonData = try JSONSerialization.jsonObject(with: data, options: []) as! [String : Any]
-//					self.processJSON(jsonData)
-//				}
-//				catch {
-//					print(error)
-//				}
-//			}
-//		}
-//		task.resume()
-//	}
-//
-//	func OLDprocessJSON(_ jsonData: [String : Any]) {
-//		for dict in jsonData {
-//			if dict.key == "current_track" {
-//				guard let currentTrackDict = dict.value as? [String : Any] else { return }
-//				if let title = currentTrackDict["title"] as? String {
-//
-//					let tempString = title
-////					let tempString = "Fred" // For testing
-//					if tempString.contains("-") {
-//						let separator = tempString.index(of: "-")!
-//						let artistSlice = tempString[..<separator]
-//						if separator < tempString.endIndex {
-//							let afterSeparator = tempString.index(after: separator)
-//							if afterSeparator < tempString.endIndex {
-//								let next = tempString.index(after: afterSeparator)
-//								let titleSlice = tempString.suffix(from: next)
-//								currentTrackTitle = String(titleSlice)
-//								currentTrackTitle = currentTrackTitle + "\n"
-//								currentTrackArtist = String(artistSlice)
-//							}
-//							else {
-//								currentTrackTitle = tempString + "\n"
-//								currentTrackArtist = HomeScreenViewController.defaultTrackArtist
-//							}
-//						}
-//						else {
-//							currentTrackTitle = tempString + "\n"
-//							currentTrackArtist = HomeScreenViewController.defaultTrackArtist
-//						}
-//					}
-//					else {
-//						currentTrackTitle = tempString + "\n"
-//						currentTrackArtist = HomeScreenViewController.defaultTrackArtist
-//					}
-//				}
-//				else {
-//					currentTrackTitle = HomeScreenViewController.defaultTrackTitle
-//					currentTrackArtist = HomeScreenViewController.defaultTrackArtist
-//				}
-//
-////$TODO: Needed?				let start_time = currentTrackDict["start_time"] as! String
-//				if currentTrackTitle == "Unknown" || currentTrackTitle == "" {
-//					currentTrackTitle = HomeScreenViewController.defaultTrackTitle
-//					currentTrackArtist = HomeScreenViewController.defaultTrackArtist
-//				}
-//
-//				if currentTrackArtist == "" {
-//					currentTrackArtist = HomeScreenViewController.defaultTrackArtist
-//				}
-//
-//				let titleAttributes: [NSAttributedStringKey : Any] = [
-//					NSAttributedStringKey.foregroundColor : UIColor.black,
-//					NSAttributedStringKey.font : UIFont.systemFont(ofSize: 30)
-//				]
-//				let displayString = NSMutableAttributedString.init(string: currentTrackTitle, attributes: titleAttributes)
-//				let artistAttributes = [
-//					NSAttributedStringKey.foregroundColor : UIColor.red,
-//					NSAttributedStringKey.font : UIFont.systemFont(ofSize: 20)
-//				]
-//				displayString.append(NSAttributedString.init(string: currentTrackArtist, attributes: artistAttributes))
-//
-//				DispatchQueue.main.async {
-//					self.songLabel.attributedText = displayString
-//				}
-//				updateNowPlaying()
-//
-//				if let artwork_url = currentTrackDict["artwork_url"] as? String,
-//					let artworkURL = URL.init(string: artwork_url) {
-//					if artwork_url.contains("images.radio.co/station_logos/s96fbbec3a") {
-//						DispatchQueue.main.async {
-//							self.albumArtwork.image = HomeScreenViewController.defaultAlbumArtwork
-//						}
-//					} else {
-//
-//						let task = URLSession.shared.dataTask(with: artworkURL) { data, response, error in
-//							if let error = error {
-//								self.handleClientError(error)
-//								return
-//							}
-//							guard let httpResponse = response as? HTTPURLResponse,
-//								(200...299).contains(httpResponse.statusCode) else {
-//									self.handleServerError(response)
-//									return
-//							}
-//
-//							if let data = data {
-//								let dataImage = UIImage.init(data: data)
-//								DispatchQueue.main.async {
-//									self.albumArtwork.image = dataImage
-//								}
-//							}
-//						}
-//						task.resume()
-//					}
-//				}
-//				else {
-//					DispatchQueue.main.async {
-//						self.albumArtwork.image = HomeScreenViewController.defaultAlbumArtwork
-//					}
-//				}
-//			}
-//			else if dict.key == "history" {
-//// $TODO: Fix when we can
-////				let historyArray = dict.value as! [Any]
-////				var songArray: [[String: Any]] = [[:]]
-////				for track in historyArray {
-//////					print(track)
-////					let x = track as! [String : Any]
-////					let song = x["title"] as? String
-////					print(song)
-////					songArray.append(x)
-////				}
-////				print("test")
-////				NotificationCenter.default.post(name: NSNotification.Name(rawValue: "History"), object: nil, userInfo: dict.value as? [AnyHashable : Any])
-//				NotificationCenter.default.post(name: NSNotification.Name(rawValue: "History"), object: nil, userInfo: jsonData)
-//			}
-//		}
-//	}
+	func checkAndPlay() {
+		loggingText = loggingText.add(string: "checkAndPlay()")
+		let now = Date.timeIntervalSinceReferenceDate
+		let interval = now - lastTimePaused
+		loggingText = loggingText.add(string: "checkAndPlay() time was \(interval)")
+		if interval > 5.0 {
+			loggingText = loggingText.add(string: "checkAndPlay() loadingURL()")
+			reloadURL()
+		} else {
+			loggingText = loggingText.add(string: "checkAndPlay() player.play()")
+			self.playerViewController?.player?.play()
+		}
+	}
 	
 	func updateNowPlaying() {
-//		loggingText = loggingText.add(string: "updateNowPlaying")
+
+		loggingText = loggingText.add(string: "updateNowPlaying")
+		
+		let artwork = MPMediaItemArtwork.init(boundsSize: currentAlbumArtwork.size, requestHandler: { (size) -> UIImage in
+			return self.currentAlbumArtwork
+		})
+		let playerRate = self.playerViewController?.player?.rate ?? 0.0
+		if self.currentTrackTitle == "" { self.currentTrackTitle = Common.defaultTrackTitle }
+		if self.currentTrackArtist == "" { self.currentTrackArtist = Common.defaultTrackArtist }
 		// Set Metadata to be Displayed in Now Playing Info Center
-		let playerRate = playerViewController?.player?.rate ?? 0.0
-		let infoCenter = MPNowPlayingInfoCenter.default()
-		if currentTrackTitle == "" {
-			currentTrackTitle = HomeScreenViewController.defaultTrackTitle
-		}
-		if currentTrackArtist == "" {
-			currentTrackArtist = HomeScreenViewController.defaultTrackArtist
-		}
-		infoCenter.nowPlayingInfo = [MPMediaItemPropertyTitle: currentTrackTitle,
-									 MPMediaItemPropertyArtist: currentTrackArtist,
-									 MPNowPlayingInfoPropertyDefaultPlaybackRate: 1,
-									 MPNowPlayingInfoPropertyPlaybackRate: playerRate
-//									 MPMediaItemPropertyPersistentID: ???
-//									 MPMediaItemPropertyAlbumTitle: "",
-//									 MPMediaItemPropertyGenre: "",
-//									 MPMediaItemPropertyReleaseDate: "",
-//									 MPMediaItemPropertyPlaybackDuration: 231,
-//									 MPMediaItemPropertyArtwork: mediaItemArtwork,
-//									 MPNowPlayingInfoPropertyElapsedPlayback: 53,
-//									 MPNowPlayingInfoPropertyPlaybackQueueCount: 13,
-//									 MPNowPlayingInfoPropertyPlaybackQueueIndex: 3
-		]
+		let nowPlayingInfo: [String: Any] = [MPMediaItemPropertyTitle: self.currentTrackTitle,
+											 MPMediaItemPropertyArtist: self.currentTrackArtist,
+											 MPNowPlayingInfoPropertyPlaybackRate: playerRate,
+											 MPMediaItemPropertyArtwork: artwork,
+											 ]
+		MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+
+		
+//		let infoCenter = MPNowPlayingInfoCenter.default()
+//		print(infoCenter[MPMediaItemPropertyTitle])
+//		return
+		
+//		// Set Metadata to be Displayed in Now Playing Info Center
+//		let artwork = MPMediaItemArtwork.init(boundsSize: currentAlbumArtwork.size, requestHandler: { (size) -> UIImage in
+//			return self.currentAlbumArtwork
+//		})
+//		let playerRate = playerViewController?.player?.rate ?? 0.0
+//		let infoCenter = MPNowPlayingInfoCenter.default()
+//		if currentTrackTitle == "" {
+//			currentTrackTitle = HomeScreenViewController.defaultTrackTitle
+//		}
+//		if currentTrackArtist == "" {
+//			currentTrackArtist = HomeScreenViewController.defaultTrackArtist
+//		}
+			
+//		infoCenter.nowPlayingInfo = [MPMediaItemPropertyTitle: currentTrackTitle,
+//									 MPMediaItemPropertyArtist: currentTrackArtist,
+//									 MPNowPlayingInfoPropertyDefaultPlaybackRate: 1,
+//									 MPNowPlayingInfoPropertyPlaybackRate: playerRate,
+//									 MPMediaItemPropertyArtwork: artwork,
+//									 MPNowPlayingInfoPropertyIsLiveStream: NSNumber(booleanLiteral: true),
+//		]
+			
+//		infoCenter.nowPlayingInfo![MPMediaItemPropertyTitle] = currentTrackTitle
+//		infoCenter.nowPlayingInfo![MPMediaItemPropertyArtist] = currentTrackArtist
+//		infoCenter.nowPlayingInfo![MPNowPlayingInfoPropertyPlaybackRate] = playerRate
+//		infoCenter.nowPlayingInfo![MPMediaItemPropertyArtwork] = artwork
+//		infoCenter.nowPlayingInfo![MPMediaItemPropertyArtwork] = artwork
 	}
 	
 	func handleClientError(_ error: Error) {
@@ -539,13 +459,8 @@ class HomeScreenViewController: UIViewController {
 					loggingText = loggingText.add(string: "Interruption Ended")
 
 					if playerViewController.player?.rate == 0.0 {
-						if playbackStalled {
-							reloadURL()
-						} else {
-							playerViewController.player?.play() // $TODO: work around
-//							playerViewController.player?.seek(to: (playerViewController.player?.currentTime())!)
-							loggingText = loggingText.add(string: "Interruption play()")
-						}
+						checkAndPlay()
+						loggingText = loggingText.add(string: "Interruption play()")
 					}
 				} else {
 					// Interruption Ended - playback should NOT resume
@@ -553,7 +468,9 @@ class HomeScreenViewController: UIViewController {
 				}
 			}
 		}
-		updateNowPlaying()
+		DispatchQueue.main.async {
+			self.updateNowPlaying()
+		}
 	}
 	
 	@objc
@@ -606,13 +523,19 @@ class HomeScreenViewController: UIViewController {
 	@objc
 	func handlePlaybackStalled(notification: Notification) {
 		
-		loggingText = loggingText.add(string: "handlePlaybackStalled")
-		playbackStalled = true
+		loggingText = loggingText.add(string: "handlePlaybackStalled we're stalled")
+		if reachability?.connection != .none {
+			loggingText = loggingText.add(string: "handlePlaybackStalled reloading URL because we have reachability")
+			reloadURL()
+		} else {
+			loggingText = loggingText.add(string: "handlePlaybackStalled setting stalled flag")
+//			playbackStalled = true
+			playerViewController?.player?.pause()
+		}
 	}
 
 //	@objc
 //	func handleRemoteControlEvent(notification: Notification) {
-//		print("MJG ------------------------------------------------------------------->>> handleRemoteControlEvent")
 //		loggingText = loggingText.add(string: "handleRemoteControlEvent")
 //	}
 }
@@ -638,7 +561,7 @@ extension HomeScreenViewController: AssetPlaybackDelegate {
 		let offsetY = pvcHeight - 125.0
 		var rect = CGRect(x: offsetX, y: offsetY, width: pvcWidth - offsetX, height: 75.0)
 		songLabel = UILabel.init(frame: rect)
-		songLabel.text = HomeScreenViewController.defaultTrackTitle
+		songLabel.text = Common.defaultTrackTitle
 		songLabel.font = UIFont.systemFont(ofSize: 30.0)
 		songLabel.numberOfLines = 2
 		songLabel.lineBreakMode = .byTruncatingMiddle
@@ -652,44 +575,39 @@ extension HomeScreenViewController: AssetPlaybackDelegate {
 		albumArtwork = UIImageView.init(frame: rect)
 		albumArtwork.contentMode = .scaleAspectFit
 		albumArtwork.center.x = (playerViewController?.contentOverlayView?.center.x)!
-		albumArtwork.image = HomeScreenViewController.defaultAlbumArtwork
+		albumArtwork.image = Common.defaultAlbumArtwork
 
 		// add them to the view
 		playerViewController?.contentOverlayView?.addSubview(albumArtwork)
 		playerViewController?.contentOverlayView?.addSubview(songLabel)
 		
 		// start playing the stream
+		loggingText = loggingText.add(string: "playerReadyToPlay: start playing the stream")
 		player.play()
 		// tell everyone it started playing
 		NotificationCenter.default.post(name: NSNotification.Name(rawValue: "PlayerStartedPlaying"), object: nil)
 
 		// setup CarPlay Remote Command Events
+		let isCarPlay = (UI_USER_INTERFACE_IDIOM() == .carPlay)
+		loggingText = loggingText.add(string: "isCarPlay = \(isCarPlay)")
+		loggingText = loggingText.add(string: "setup CarPlay Remote Command Events")
+		// Enable Remote Command events
+		MPRemoteCommandCenter.shared().playCommand.isEnabled = true
+		MPRemoteCommandCenter.shared().pauseCommand.isEnabled = true
 		let commandCenter = MPRemoteCommandCenter.shared()
 		commandCenter.playCommand.addTarget { (event) -> MPRemoteCommandHandlerStatus in
 			loggingText = loggingText.add(string: "commandCenter.playCommand")
-			if playbackStalled {
-				self.reloadURL()
-			} else if self.playerViewController?.player?.rate == 0.0 {
+			if self.playerViewController?.player?.rate == 0.0 {
 				
 				do {
 					try AVAudioSession.sharedInstance().setActive(true)
 				} catch  {
 					loggingText = loggingText.add(string: "AVAudioSession.sharedInstance().setActive(true) error = \(error)")
 				}
-//				if Reachability.isConnectedToNetwork() {
 					loggingText = loggingText.add(string: "commandCenter.playCommand play()")
-					DispatchQueue.main.async {
-						self.playerViewController?.player?.play() // $TODO: work-around
-//						self.playerViewController?.player?.seek(to: (self.playerViewController?.player?.currentTime())!)
-					}
-//				} else {
-//					loggingText = loggingText.add(string: "commandCenter.playCommand NOT connected to network")
-//					loggingText = loggingText.add(string: "commandCenter.playCommand reloading URL()")
-//					self.reloadURL()
-//					return MPRemoteCommandHandlerStatus.commandFailed
-//				}
+//				self.playerViewController?.player?.play()
+				self.checkAndPlay()
 			}
-			self.updateNowPlaying()
 			return MPRemoteCommandHandlerStatus.success
 		}
 		
@@ -698,9 +616,27 @@ extension HomeScreenViewController: AssetPlaybackDelegate {
 			if self.playerViewController?.player?.rate == 1.0 {
 				self.playerViewController?.player?.pause()
 			}
-			self.updateNowPlaying()
 			return MPRemoteCommandHandlerStatus.success
 		}
+		
+		// Set Now Playing metadata in MPNowPlayingInfoCenter
+//		let artwork = MPMediaItemArtwork.init(boundsSize: HomeScreenViewController.defaultAlbumArtwork.size, requestHandler: { (size) -> UIImage in
+//
+//			let rect = CGRect(x: 0.0, y: 0.0, width: size.width, height: size.height)
+//			UIGraphicsBeginImageContext(size)
+//			HomeScreenViewController.defaultAlbumArtwork.draw(in: rect)
+//			let newImage = UIGraphicsGetImageFromCurrentImageContext()
+//			UIGraphicsEndImageContext()
+//			return newImage!
+//		})
+//		let nowPlayingInfo: [String: Any] = [MPMediaItemPropertyTitle: Common.defaultTrackTitle,
+//											 MPMediaItemPropertyArtist: Common.defaultTrackArtist,
+//											 MPNowPlayingInfoPropertyPlaybackRate: 1.0,
+//											 MPMediaItemPropertyArtwork: mediaItemArtwork!,
+//											 MPNowPlayingInfoPropertyIsLiveStream: NSNumber(booleanLiteral: true),
+//											 ]
+//		MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+
 	}
 	
 	func streamPlaybackManager(_ streamPlaybackManager: AssetPlaybackManager,

@@ -131,7 +131,6 @@ class RSSTableViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-		self.perform(#selector(readRSSFeed), with: nil, afterDelay: 0.10)
     }
 	
 	override func viewWillAppear(_ animated: Bool) {
@@ -139,19 +138,16 @@ class RSSTableViewController: UITableViewController {
 		self.tableView.reloadData()
 	}
 	
+	override func viewDidAppear(_ animated: Bool) {
+		super.viewDidAppear(animated)		
+		if rssArray.count == 0 {
+			readRSSFeed()
+		} else {
+			self.tableView.reloadData()
+		}
+	}
+	
 	@objc func readRSSFeed() {
-		
-//		do {
-//			let test = URL(string: RSSTableViewController.rssFeedURL)
-//			let result = try test?.checkResourceIsReachable()
-//			if !(result!) {
-//				print("error loading XML URL")
-//				return
-//			}
-//		} catch {
-//			print("error = \(error)")
-//			return
-//		}
 		
 		let parser = XMLParser(contentsOf: URL(string: RSSTableViewController.rssFeedURL)!)
 		parser?.delegate = self
