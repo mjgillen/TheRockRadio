@@ -18,32 +18,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 	func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
 		
-		// Set up data source and delegate
-//		MPPlayableContentManager.shared().dataSource = SrirockaContentManager.shared
-//		MPPlayableContentManager.shared().delegate = SrirockaContentManager.shared
-
-//		// Set Now Playing metadata in MPNowPlayingInfoCenter
-//		let artwork = MPMediaItemArtwork.init(boundsSize: Common.defaultAlbumArtwork.size, requestHandler: { (size) -> UIImage in
-//			
-//			let rect = CGRect(x: 0.0, y: 0.0, width: size.width, height: size.height)
-//			UIGraphicsBeginImageContext(size)
-//			Common.defaultAlbumArtwork.draw(in: rect)
-//			let newImage = UIGraphicsGetImageFromCurrentImageContext()
-//			UIGraphicsEndImageContext()
-//			return newImage!
-//		})
-//		let nowPlayingInfo: [String: Any] = [MPMediaItemPropertyTitle: Common.defaultTrackTitle,
-//										 MPMediaItemPropertyArtist: Common.defaultTrackArtist,
-//										 MPNowPlayingInfoPropertyPlaybackRate: 1.0,
-//										 MPMediaItemPropertyArtwork: artwork,
-//										 MPNowPlayingInfoPropertyIsLiveStream: NSNumber(booleanLiteral: true),
-//		]
-//		MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
-
-		//		loggingText = loggingText.add(string: "didFinishLaunchingWithOptions")
 		do {
-			try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback) // $TODO: May need to restart session after loss of wifi? Add movie playback?
-			//try AVAudioSession.sharedInstance().setCategory(AVAudioSessionModeSpokenAudio
+			try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback)
 			try AVAudioSession.sharedInstance().setActive(true)
 		} catch  {
 			loggingText = loggingText.add(string: "AVAudioSession.sharedInstance().setCategory error = \(error)")
@@ -72,12 +48,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 		// Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
 		loggingText = loggingText.add(string: "applicationDidBecomeActive")
 //		NotificationCenter.default.post(name: NSNotification.Name("RestartStream"), object: nil)
-
-		do {
-			try AVAudioSession.sharedInstance().setActive(true)
-		} catch  {
-			loggingText = loggingText.add(string: "AVAudioSession.sharedInstance().setActive(true) error = \(error)")
-		}
+//		do {
+//			try AVAudioSession.sharedInstance().setActive(true)
+//		} catch  {
+//			loggingText = loggingText.add(string: "AVAudioSession.sharedInstance().setActive(true) error = \(error)")
+//		}
 	}
 
 	func applicationWillTerminate(_ application: UIApplication) {

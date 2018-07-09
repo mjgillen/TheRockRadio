@@ -57,7 +57,6 @@ class AssetPlaybackManager: NSObject {
                 if item.status == .readyToPlay {
                     if !strongSelf.readyForPlayback {
 						loggingText = loggingText.add(string: "playerItem readyToPlay")
-						assetIsReady = true
                         strongSelf.readyForPlayback = true
 						retryCount = 0
                         strongSelf.delegate?.streamPlaybackManager(strongSelf, playerReadyToPlay: strongSelf.player)
@@ -66,7 +65,6 @@ class AssetPlaybackManager: NSObject {
                     let error = item.error
 					loggingText = loggingText.add(string: "playerItemObserver item.status = .failed")
 					loggingText = loggingText.add(string: "playerItemObserver error loading asset = \(String(describing: error?.localizedDescription))")
-					assetIsReady = false
 					// try to recover
 					if retryCount < 15 {
 						retryCount += 1
@@ -99,6 +97,22 @@ class AssetPlaybackManager: NSObject {
                 urlAssetObserver = asset.urlAsset.observe(\AVURLAsset.isPlayable, options: [.new, .initial]) { [weak self] (urlAsset, _) in
                     guard let strongSelf = self, urlAsset.isPlayable == true else { return }
                     
+					strongSelf.playerItem = nil
+					strongSelf.player.replaceCurrentItem(with: nil)
+					strongSelf.readyForPlayback = false
+					
+					DispatchQueue.main.async {
+						if TimedMetadataContext != 0 {
+							strongSelf.playerItem?.removeObserver(strongSelf, forKeyPath: "timedMetadata", context: &TimedMetadataContext)
+						}
+						if PlayerContext != 0 {
+							strongSelf.player.removeObserver(strongSelf, forKeyPath: "status", context: &PlayerContext)
+						}
+						if PlayerRateContext != 0 {
+							strongSelf.player.removeObserver(strongSelf, forKeyPath: "rate", context: &PlayerRateContext)
+						}
+					}
+					
                     strongSelf.playerItem = AVPlayerItem(asset: urlAsset)
                     strongSelf.player.replaceCurrentItem(with: strongSelf.playerItem)
 					DispatchQueue.main.async {
@@ -113,7 +127,6 @@ class AssetPlaybackManager: NSObject {
                 playerItem = nil
                 player.replaceCurrentItem(with: nil)
                 readyForPlayback = false
-				assetIsReady = false
 				loggingText = loggingText.add(string: "var asset didSet FAILED")
 				// $TODO: put up an alert to try again.
             }
@@ -149,7 +162,7 @@ class AssetPlaybackManager: NSObject {
 			}
 		} else
 		if context == &PlayerContext {
-			//			loggingText = loggingText.add(string: "observeValue PlayerContext")
+			loggingText = loggingText.add(string: "observeValue PlayerContext")
 			guard let thePlayer: AVPlayer = object as? AVPlayer else {
 				loggingText = loggingText.add(string: "observeValue PlayerContext could not get object as AVPlayer")
 				return
@@ -159,6 +172,7 @@ class AssetPlaybackManager: NSObject {
 				loggingText = loggingText.add(string: "observeValue PlayerContext status = .failed")
 			}
 		} else if context == &PlayerRateContext {
+			loggingText = loggingText.add(string: "observeValue PlayerRateContext")
 			guard let thePlayer: AVPlayer = object as? AVPlayer else {
 				loggingText = loggingText.add(string: "observeValue PlayerRate could not get object as AVPlayer")
 				return

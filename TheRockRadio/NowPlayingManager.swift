@@ -13,7 +13,7 @@ class NowPlayingManager: NSObject {
 
 	var trackTitle = Common.defaultTrackTitle
 	var trackArtist = Common.defaultTrackArtist
-//	var albumArtwork: MPMediaItemArtwork?
+	var albumArtwork: MPMediaItemArtwork?
 	var playerRate = 0.0
 	
 	override init() {
@@ -25,7 +25,7 @@ class NowPlayingManager: NSObject {
 		trackTitle = title
 		trackArtist = artist
 		playerRate = rate
-		let albumArtwork = MPMediaItemArtwork.init(boundsSize: artWork.size, requestHandler: { (size) -> UIImage in
+		albumArtwork = MPMediaItemArtwork.init(boundsSize: artWork.size, requestHandler: { (size) -> UIImage in
 			
 			let rect = CGRect(x: 0.0, y: 0.0, width: size.width, height: size.height)
 			UIGraphicsBeginImageContext(size)

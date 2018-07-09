@@ -17,8 +17,6 @@ var loggingLabel = UILabel()
 
 // state flags
 var avPlayerVCisReady = true
-var assetIsReady = false
-var isReachable = false
 var retryCount = 0
 //var playbackStalled = false
 var lastTimePaused: TimeInterval = Date.timeIntervalSinceReferenceDate
@@ -114,19 +112,11 @@ class HomeScreenViewController: UIViewController {
 	
 	var mediaItemArtwork: MPMediaItemArtwork?
 	
-	// Reachability
-	var reachability: Reachability?
-	var networkStatus = UILabel()
-	var hostNameLabel = UILabel()
-	let hostNames = [nil, "apple.com", "invalidhost"]
-	var hostIndex = 0
-
-	
     override func viewDidLoad() {
         super.viewDidLoad()
 //		loggingText = loggingText.add(string: "viewDidLoad")
 		
-		nowPlayingManager.updateNowPlayingWith(title: Common.defaultTrackTitle, artist: Common.defaultTrackArtist, artWork: Common.defaultAlbumArtwork)
+//		nowPlayingManager.updateNowPlayingWith(title: Common.defaultTrackTitle, artist: Common.defaultTrackArtist, artWork: Common.defaultAlbumArtwork)
 
 		// Set AssetListTableViewController as the delegate for AssetPlaybackManager to recieve playback information.
 		AssetPlaybackManager.sharedManager.delegate = self
@@ -139,23 +129,9 @@ class HomeScreenViewController: UIViewController {
 
 		// handle interruptions
 		DispatchQueue.main.async {
-			// and another one: // AVPlayerItemPlaybackStalledNotification the call player.seekToTime(player.currentTime) instead of player.play()
 			notificationCenter.addObserver(self, selector: #selector(HomeScreenViewController.handleInterruption), name: .AVAudioSessionInterruption, object: AVAudioSession.sharedInstance)
 			notificationCenter.addObserver(self, selector: #selector(HomeScreenViewController.handleRouteChange), name: .AVAudioSessionRouteChange, object: nil)
-			notificationCenter.addObserver(self, selector: #selector(HomeScreenViewController.handleMediaReset), name: .AVAudioSessionMediaServicesWereReset, object: nil)
-//			notificationCenter.addObserver(self, selector: #selector(HomeScreenViewController.handlePlaybackStalled), name: NSNotification.Name.AVPlayerItemPlaybackStalled, object: nil)
 		}
-		
-//		UIApplication.shared.beginReceivingRemoteControlEvents()
-//		notificationCenter.addObserver(self, selector: #selector(handleRemoteControlEvent), name: NSNotification.Name(rawValue: "TogglePlay"), object: nil)
-//		notificationCenter.addObserver(self, selector: #selector(handleRemoteControlEvent), name: NSNotification.Name(rawValue: "TogglePause"), object: nil)
-		
-		
-		// Observe the kNetworkReachabilityChangedNotification. When that notification is posted, the method reachabilityChanged will be called.
-//		notificationCenter.addObserver(self, selector:#selector(reachabilityChanged), name:NSNotification.Name(rawValue: HomeScreenViewController.kReachabilityChangedNotification), object:nil)
-		
-		// Reachability
-//		startHost(at: 0)
 	}
 
 	override func viewWillAppear(_ animated: Bool) {
@@ -177,10 +153,6 @@ class HomeScreenViewController: UIViewController {
 		return .portrait
 	}
 	
-	deinit {
-		stopNotifier()
-	}
-
 	override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
 		super.prepare(for: segue, sender: sender)
 		if segue.identifier == HomeScreenViewController.presentPlayerViewControllerSegueID {
@@ -213,9 +185,8 @@ class HomeScreenViewController: UIViewController {
 			return
 		}
 		loggingText = loggingText.add(string: "restartStream player.play()")
-//		playerViewController?.player?.play()
 		checkAndPlay()
-//			getStationPlaylistInfo()
+		getStationPlaylistInfo()
 	}
 	
 	@objc func reloadURL() {
@@ -227,22 +198,34 @@ class HomeScreenViewController: UIViewController {
 			return
 		}
 
-		// Restart the Audio Session
+		// Reactivate the Audio Session
 		do {
+			loggingText = loggingText.add(string: "reloadURL-> AVAudioSession.setActive")
 			try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback)
 			try AVAudioSession.sharedInstance().setActive(true)
+			
+			loggingText = loggingText.add(string: "reloadURL-> AVAudioSession.setActive = TRUE")
+			
+			// Load the Asset to playback into AssetPlaybackManager.
+			loggingText = loggingText.add(string: "reloadURL reloading asset")
+			let urlAsset = AVURLAsset.init(url: URL.init(string: Common.streamingURL)!)
+			let stream = StreamListManager.shared.streams.first
+			let asset = Asset.init(stream: stream!, urlAsset: urlAsset)
+			AssetPlaybackManager.sharedManager.setAssetForPlayback(asset)
+			retryCount = 0
 		} catch  {
-			loggingText = loggingText.add(string: "AVAudioSession.sharedInstance().setCategory error = \(error)")
+			loggingText = loggingText.add(string: "reloadURL-> AVAudioSession.sharedInstance().setCategory error = \(error)")
+			if retryCount < 15 {
+				retryCount += 1
+				loggingText = loggingText.add(string: "reloadURL-> retrying")
+				self.perform(#selector(reloadURL), with: nil, afterDelay: 2.0)
+			} else {
+				retryCount = 0
+				loggingText = loggingText.add(string: "reloadURL error 15 RETRIES exhausted)")
+			}
 		}
-		
-		// Load the Asset to playback into AssetPlaybackManager.
-		loggingText = loggingText.add(string: "reloadURL reloading asset")
-		let urlAsset = AVURLAsset.init(url: URL.init(string: Common.streamingURL)!)
-		let stream = StreamListManager.shared.streams.first
-		let asset = Asset.init(stream: stream!, urlAsset: urlAsset)
-		AssetPlaybackManager.sharedManager.setAssetForPlayback(asset)
 	}
-
+	
 	@objc func handleNewSongNotification(notification: NSNotification) {
 //		loggingText = loggingText.add(string: "handleNewSongNotification")
 		getStationPlaylistInfo()
@@ -278,7 +261,7 @@ class HomeScreenViewController: UIViewController {
 	
 	func processJSON(_ jsonData: RadioJSON) {
 		
-//		currentTrackTitle = jsonData.currentTrack.title
+		loggingText = loggingText.add(string: "processJSON")
 		(currentTrackTitle, currentTrackArtist) = sliceJSONSongString(songString: jsonData.currentTrack.title)
 		if currentTrackTitle == "Unknown" || currentTrackTitle == "" {
 			currentTrackTitle = Common.defaultTrackTitle
@@ -289,24 +272,8 @@ class HomeScreenViewController: UIViewController {
 			currentTrackArtist = Common.defaultTrackArtist
 		}
 		
-		let titleAttributes: [NSAttributedStringKey : Any] = [
-			NSAttributedStringKey.foregroundColor : UIColor.black,
-			NSAttributedStringKey.font : UIFont.systemFont(ofSize: 30)
-		]
-		let displayString = NSMutableAttributedString.init(string: currentTrackTitle + "\n", attributes: titleAttributes)
-		let artistAttributes = [
-			NSAttributedStringKey.foregroundColor : UIColor.red,
-			NSAttributedStringKey.font : UIFont.systemFont(ofSize: 20)
-		]
-		displayString.append(NSAttributedString.init(string: currentTrackArtist, attributes: artistAttributes))
+		updateSongLabel()
 		
-		DispatchQueue.main.async {
-			self.songLabel.attributedText = displayString
-		}
-		DispatchQueue.main.async {
-			self.updateNowPlaying()
-		}
-
 		if jsonData.currentTrack.artwork_url.absoluteString.contains("images.radio.co/station_logos/s96fbbec3a") {
 			DispatchQueue.main.async {
 				self.albumArtwork.image = Common.defaultAlbumArtwork
@@ -329,6 +296,7 @@ class HomeScreenViewController: UIViewController {
 				if let data = data {
 					let dataImage = UIImage.init(data: data)
 					DispatchQueue.main.async {
+						loggingText = loggingText.add(string: "updating albumArtwork")
 						self.albumArtwork.image = dataImage
 						self.currentAlbumArtwork = dataImage!
 					}
@@ -361,14 +329,32 @@ class HomeScreenViewController: UIViewController {
 		}
 		return (trackTitle, trackArtist)
 	}
+	
+	func updateSongLabel() {
+		let titleAttributes: [NSAttributedStringKey : Any] = [
+			NSAttributedStringKey.foregroundColor : UIColor.black,
+			NSAttributedStringKey.font : UIFont.systemFont(ofSize: 30)
+		]
+		let displayString = NSMutableAttributedString.init(string: currentTrackTitle + "\n", attributes: titleAttributes)
+		let artistAttributes = [
+			NSAttributedStringKey.foregroundColor : UIColor.red,
+			NSAttributedStringKey.font : UIFont.systemFont(ofSize: 20)
+		]
+		displayString.append(NSAttributedString.init(string: currentTrackArtist, attributes: artistAttributes))
+		
+		DispatchQueue.main.async {
+			loggingText = loggingText.add(string: "updating songLabel")
+			self.songLabel.attributedText = displayString
+		}
+	}
 
 	func checkAndPlay() {
 		loggingText = loggingText.add(string: "checkAndPlay()")
 		let now = Date.timeIntervalSinceReferenceDate
 		let interval = now - lastTimePaused
-		loggingText = loggingText.add(string: "checkAndPlay() time was \(interval)")
+		loggingText = loggingText.add(string: String(format: "checkAndPlay() time was %.1f", interval))
 		if interval > 5.0 {
-			loggingText = loggingText.add(string: "checkAndPlay() loadingURL()")
+			loggingText = loggingText.add(string: "checkAndPlay() reloadingURL()")
 			reloadURL()
 		} else {
 			loggingText = loggingText.add(string: "checkAndPlay() player.play()")
@@ -376,62 +362,11 @@ class HomeScreenViewController: UIViewController {
 		}
 	}
 	
-	func updateNowPlaying() {
-
-		loggingText = loggingText.add(string: "updateNowPlaying")
-		
-		let artwork = MPMediaItemArtwork.init(boundsSize: currentAlbumArtwork.size, requestHandler: { (size) -> UIImage in
-			return self.currentAlbumArtwork
-		})
-		let playerRate = self.playerViewController?.player?.rate ?? 0.0
-		if self.currentTrackTitle == "" { self.currentTrackTitle = Common.defaultTrackTitle }
-		if self.currentTrackArtist == "" { self.currentTrackArtist = Common.defaultTrackArtist }
-		// Set Metadata to be Displayed in Now Playing Info Center
-		let nowPlayingInfo: [String: Any] = [MPMediaItemPropertyTitle: self.currentTrackTitle,
-											 MPMediaItemPropertyArtist: self.currentTrackArtist,
-											 MPNowPlayingInfoPropertyPlaybackRate: playerRate,
-											 MPMediaItemPropertyArtwork: artwork,
-											 ]
-		MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
-
-		
-//		let infoCenter = MPNowPlayingInfoCenter.default()
-//		print(infoCenter[MPMediaItemPropertyTitle])
-//		return
-		
-//		// Set Metadata to be Displayed in Now Playing Info Center
-//		let artwork = MPMediaItemArtwork.init(boundsSize: currentAlbumArtwork.size, requestHandler: { (size) -> UIImage in
-//			return self.currentAlbumArtwork
-//		})
-//		let playerRate = playerViewController?.player?.rate ?? 0.0
-//		let infoCenter = MPNowPlayingInfoCenter.default()
-//		if currentTrackTitle == "" {
-//			currentTrackTitle = HomeScreenViewController.defaultTrackTitle
-//		}
-//		if currentTrackArtist == "" {
-//			currentTrackArtist = HomeScreenViewController.defaultTrackArtist
-//		}
-			
-//		infoCenter.nowPlayingInfo = [MPMediaItemPropertyTitle: currentTrackTitle,
-//									 MPMediaItemPropertyArtist: currentTrackArtist,
-//									 MPNowPlayingInfoPropertyDefaultPlaybackRate: 1,
-//									 MPNowPlayingInfoPropertyPlaybackRate: playerRate,
-//									 MPMediaItemPropertyArtwork: artwork,
-//									 MPNowPlayingInfoPropertyIsLiveStream: NSNumber(booleanLiteral: true),
-//		]
-			
-//		infoCenter.nowPlayingInfo![MPMediaItemPropertyTitle] = currentTrackTitle
-//		infoCenter.nowPlayingInfo![MPMediaItemPropertyArtist] = currentTrackArtist
-//		infoCenter.nowPlayingInfo![MPNowPlayingInfoPropertyPlaybackRate] = playerRate
-//		infoCenter.nowPlayingInfo![MPMediaItemPropertyArtwork] = artwork
-//		infoCenter.nowPlayingInfo![MPMediaItemPropertyArtwork] = artwork
-	}
-	
 	func handleClientError(_ error: Error) {
-//		loggingText = loggingText.add(string: "handleClientError")
+		loggingText = loggingText.add(string: "handleClientError")
 }
 	func handleServerError(_ response: URLResponse?) {
-//		loggingText = loggingText.add(string: "handleServerError")
+		loggingText = loggingText.add(string: "handleServerError")
 	}
 
 	@objc func handleInterruption(notification: Notification) { // kAudioSessionProperty_ServerDied
@@ -467,9 +402,6 @@ class HomeScreenViewController: UIViewController {
 					loggingText = loggingText.add(string: "Interruption Ended DO NOT RESUME")
 				}
 			}
-		}
-		DispatchQueue.main.async {
-			self.updateNowPlaying()
 		}
 	}
 	
@@ -510,41 +442,12 @@ class HomeScreenViewController: UIViewController {
 			loggingText = loggingText.add(string: "handleRouteChange default")
 		}
 	}
-
-	@objc
-	func handleMediaReset(notification: Notification) {
-		guard let userInfo = notification.userInfo else { return }
-		
-		print("MJG ------------------------------------------------------------------->>> handleMediaReset with reason = \(userInfo)")
-		loggingText = loggingText.add(string: "handleMediaReset AVAudioSessionMediaServicesWereReset with reason = \(userInfo)")
-		reloadURL()
-	}
-
-	@objc
-	func handlePlaybackStalled(notification: Notification) {
-		
-		loggingText = loggingText.add(string: "handlePlaybackStalled we're stalled")
-		if reachability?.connection != .none {
-			loggingText = loggingText.add(string: "handlePlaybackStalled reloading URL because we have reachability")
-			reloadURL()
-		} else {
-			loggingText = loggingText.add(string: "handlePlaybackStalled setting stalled flag")
-//			playbackStalled = true
-			playerViewController?.player?.pause()
-		}
-	}
-
-//	@objc
-//	func handleRemoteControlEvent(notification: Notification) {
-//		loggingText = loggingText.add(string: "handleRemoteControlEvent")
-//	}
 }
 
 extension HomeScreenViewController: AssetPlaybackDelegate {
 	func streamPlaybackManager(_ streamPlaybackManager: AssetPlaybackManager, playerReadyToPlay player: AVPlayer) {
 		
 		loggingText = loggingText.add(string: "streamPlaybackManager: playerReadyToPlay")
-		assetIsReady = true
 
 		// $TODO: do we need to tell CarPlay we are ready?
 		playerViewController?.player = player
@@ -561,11 +464,12 @@ extension HomeScreenViewController: AssetPlaybackDelegate {
 		let offsetY = pvcHeight - 125.0
 		var rect = CGRect(x: offsetX, y: offsetY, width: pvcWidth - offsetX, height: 75.0)
 		songLabel = UILabel.init(frame: rect)
-		songLabel.text = Common.defaultTrackTitle
+		songLabel.text = ""
 		songLabel.font = UIFont.systemFont(ofSize: 30.0)
 		songLabel.numberOfLines = 2
 		songLabel.lineBreakMode = .byTruncatingMiddle
 		songLabel.textAlignment = .center
+		updateSongLabel()
 		
 		// album artwork image
 		rect.origin.x = 0.0
@@ -588,9 +492,9 @@ extension HomeScreenViewController: AssetPlaybackDelegate {
 		NotificationCenter.default.post(name: NSNotification.Name(rawValue: "PlayerStartedPlaying"), object: nil)
 
 		// setup CarPlay Remote Command Events
-		let isCarPlay = (UI_USER_INTERFACE_IDIOM() == .carPlay)
-		loggingText = loggingText.add(string: "isCarPlay = \(isCarPlay)")
-		loggingText = loggingText.add(string: "setup CarPlay Remote Command Events")
+//		let isCarPlay = (UI_USER_INTERFACE_IDIOM() == .carPlay)
+//		loggingText = loggingText.add(string: "isCarPlay = \(isCarPlay)")
+//		loggingText = loggingText.add(string: "setup CarPlay Remote Command Events")
 		// Enable Remote Command events
 		MPRemoteCommandCenter.shared().playCommand.isEnabled = true
 		MPRemoteCommandCenter.shared().pauseCommand.isEnabled = true
@@ -598,14 +502,6 @@ extension HomeScreenViewController: AssetPlaybackDelegate {
 		commandCenter.playCommand.addTarget { (event) -> MPRemoteCommandHandlerStatus in
 			loggingText = loggingText.add(string: "commandCenter.playCommand")
 			if self.playerViewController?.player?.rate == 0.0 {
-				
-				do {
-					try AVAudioSession.sharedInstance().setActive(true)
-				} catch  {
-					loggingText = loggingText.add(string: "AVAudioSession.sharedInstance().setActive(true) error = \(error)")
-				}
-					loggingText = loggingText.add(string: "commandCenter.playCommand play()")
-//				self.playerViewController?.player?.play()
 				self.checkAndPlay()
 			}
 			return MPRemoteCommandHandlerStatus.success
@@ -618,25 +514,6 @@ extension HomeScreenViewController: AssetPlaybackDelegate {
 			}
 			return MPRemoteCommandHandlerStatus.success
 		}
-		
-		// Set Now Playing metadata in MPNowPlayingInfoCenter
-//		let artwork = MPMediaItemArtwork.init(boundsSize: HomeScreenViewController.defaultAlbumArtwork.size, requestHandler: { (size) -> UIImage in
-//
-//			let rect = CGRect(x: 0.0, y: 0.0, width: size.width, height: size.height)
-//			UIGraphicsBeginImageContext(size)
-//			HomeScreenViewController.defaultAlbumArtwork.draw(in: rect)
-//			let newImage = UIGraphicsGetImageFromCurrentImageContext()
-//			UIGraphicsEndImageContext()
-//			return newImage!
-//		})
-//		let nowPlayingInfo: [String: Any] = [MPMediaItemPropertyTitle: Common.defaultTrackTitle,
-//											 MPMediaItemPropertyArtist: Common.defaultTrackArtist,
-//											 MPNowPlayingInfoPropertyPlaybackRate: 1.0,
-//											 MPMediaItemPropertyArtwork: mediaItemArtwork!,
-//											 MPNowPlayingInfoPropertyIsLiveStream: NSNumber(booleanLiteral: true),
-//											 ]
-//		MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
-
 	}
 	
 	func streamPlaybackManager(_ streamPlaybackManager: AssetPlaybackManager,
@@ -656,100 +533,13 @@ extension String {
 		var newString = self + "  " + dateString
 		newString = newString + " " + string + "\n"
 		DispatchQueue.main.async {
+			let oldWidth = loggingLabel.frame.size.width
 			loggingLabel.text = newString
 			loggingLabel.sizeToFit()
+			loggingLabel.frame.size.width = oldWidth
 		}
 		print("MJG ------------------------------------------------------------------->>> \(string)")
 		return newString
-	}
-}
-
-// Reachability
-extension HomeScreenViewController {
-
-	func startHost(at index: Int) {
-		stopNotifier()
-		setupReachability(hostNames[index], useClosures: true)
-		startNotifier()
-		DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-			self.startHost(at: (index + 1) % 3)
-		}
-	}
-
-	func setupReachability(_ hostName: String?, useClosures: Bool) {
-		let reachability: Reachability?
-		if let hostName = hostName {
-			reachability = Reachability(hostname: hostName)
-			hostNameLabel.text = hostName
-		} else {
-			reachability = Reachability()
-			hostNameLabel.text = "No host name"
-		}
-		self.reachability = reachability
-		print("--- set up with host name: \(hostNameLabel.text!)")
-		
-		if useClosures {
-			reachability?.whenReachable = { reachability in
-				self.updateLabelColourWhenReachable(reachability)
-			}
-			reachability?.whenUnreachable = { reachability in
-				self.updateLabelColourWhenNotReachable(reachability)
-			}
-		} else {
-			NotificationCenter.default.addObserver(
-				self,
-				selector: #selector(reachabilityChanged(_:)),
-				name: .reachabilityChanged,
-				object: reachability
-			)
-		}
-	}
-	
-	func startNotifier() {
-		print("--- start notifier")
-		do {
-			try reachability?.startNotifier()
-		} catch {
-			networkStatus.textColor = .red
-			networkStatus.text = "Unable to start\nnotifier"
-			return
-		}
-	}
-	
-	func stopNotifier() {
-		print("--- stop notifier")
-		reachability?.stopNotifier()
-		NotificationCenter.default.removeObserver(self, name: .reachabilityChanged, object: nil)
-		reachability = nil
-	}
-	
-	func updateLabelColourWhenReachable(_ reachability: Reachability) {
-		print("\(reachability.description) - \(reachability.connection)")
-		if reachability.connection == .wifi {
-			self.networkStatus.textColor = .green
-		} else {
-			self.networkStatus.textColor = .blue
-		}
-		
-		self.networkStatus.text = "\(reachability.connection)"
-	}
-	
-	func updateLabelColourWhenNotReachable(_ reachability: Reachability) {
-		print("\(reachability.description) - \(reachability.connection)")
-		
-		self.networkStatus.textColor = .red
-		
-		self.networkStatus.text = "\(reachability.connection)"
-	}
-	
-	@objc func reachabilityChanged(_ note: Notification) {
-		let reachability = note.object as! Reachability
-		
-		if reachability.connection != .none {
-			updateLabelColourWhenReachable(reachability)
-		} else {
-			updateLabelColourWhenNotReachable(reachability)
-		}
 	}
 }
 

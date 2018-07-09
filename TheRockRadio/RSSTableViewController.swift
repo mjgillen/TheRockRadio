@@ -162,7 +162,6 @@ class RSSTableViewController: UITableViewController {
     // MARK: - Table view data source
 
     override func numberOfSections(in tableView: UITableView) -> Int {
-        // #warning Incomplete implementation, return the number of sections
         return 1
     }
 
@@ -184,23 +183,10 @@ class RSSTableViewController: UITableViewController {
     }
 	
 	override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-//		let storyboard = UIStoryboard(name: "Main", bundle: nil)
-//		guard let detailsVC = storyboard.instantiateViewController(withIdentifier: "RSSDetailsViewController") as? RSSDetailsViewController else { return }
-//		var rssData = rssArray[indexPath.row]
-//		detailsVC.rssData = rssData
-//		rssData.read = true
-//		self.navigationController?.pushViewController(detailsVC, animated: true)
-		
 		var rssData = rssArray[indexPath.row]
 		rssData.read = true
 		let webVC = BasicWebViewController()
-//		let backItem = UIBarButtonItem()
-//		backItem.title = NSLocalizedString("Back", comment: "Back");
-//		navigationItem.backBarButtonItem = backItem
-//		webVC.webTitle = rssData.title
-//		self.navigationController?.setNavigationBarHidden(false, animated: true)
 		self.navigationController?.pushViewController(webVC, animated: true)
-
 		let urlString = rssData.link.replacingOccurrences(of: " |\n", with: "", options: .regularExpression)
 		webVC.loadURL(url: urlString)
 	}
@@ -212,15 +198,4 @@ class RSSTableViewController: UITableViewController {
 		rssArray[indexPath.row].read = true
 		self.navigationController?.pushViewController(detailsVC, animated: true)
 	}
-
-	/*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
 }

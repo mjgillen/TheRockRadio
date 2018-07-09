@@ -10,8 +10,8 @@ import UIKit
 
 class Common: NSObject {
 	
-	static let defaultTrackTitle = "KEBF/KZSR\n"
-	static let defaultTrackArtist = "97.3 / 107.9 The Rock Radio"
+	static let defaultTrackTitle = "97.3 / 107.9 The Rock"
+	static let defaultTrackArtist = "KEBF/KZSR"
 	static let defaultAlbumArtwork: UIImage = #imageLiteral(resourceName: "RockLogo")
 	static let streamingURL = "https://streaming.radio.co/s96fbbec3a/listen"
 	static let playlistURL = "https://public.radio.co/stations/s96fbbec3a/status"

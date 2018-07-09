@@ -12,9 +12,9 @@ import MessageUI
 class WebsiteViewController: UIViewController {
 
 	@IBOutlet weak var callButton: UIButton!
-	@IBOutlet weak var websiteButton: UIButton!
+//	@IBOutlet weak var websiteButton: UIButton!
 	@IBOutlet weak var contactButton: UIButton!
-	@IBOutlet weak var donateButton: UIButton!
+//	@IBOutlet weak var donateButton: UIButton!
 	
 	var mailDelegate:           MFMailComposeViewControllerDelegate!
 
@@ -23,11 +23,11 @@ class WebsiteViewController: UIViewController {
 		guard let number = URL(string: "tel://8057722037") else { return }
 		UIApplication.shared.open(number)	}
 	
-	@IBAction func onWebsiteButton(_ sender: Any) {
-		if let link = URL(string: "https://www.esterobayradio.org") {
-			UIApplication.shared.open(link)
-		}
-	}
+//	@IBAction func onWebsiteButton(_ sender: Any) {
+//		if let link = URL(string: "https://www.esterobayradio.org") {
+//			UIApplication.shared.open(link)
+//		}
+//	}
 	
 	@IBAction func onContactButton(_ sender: Any) {
 		sendFeedbackEmail()
@@ -36,11 +36,11 @@ class WebsiteViewController: UIViewController {
 //		}
 	}
 	
-	@IBAction func onDonateButton(_ sender: Any) {
-		if let link = URL(string: "https://www.esterobayradio.org/support-the-rock") {
-			UIApplication.shared.open(link)
-		}
-	}
+//	@IBAction func onDonateButton(_ sender: Any) {
+//		if let link = URL(string: "https://www.esterobayradio.org/support-the-rock") {
+//			UIApplication.shared.open(link)
+//		}
+//	}
 	
 	
 	override func viewDidLoad() {
@@ -55,6 +55,7 @@ class WebsiteViewController: UIViewController {
     }
 	
 	func sendFeedbackEmail() {
+		let emailAddress = "YourVoice@CentralCoastRadio.org"
 		if MFMailComposeViewController.canSendMail() {
 			mailDelegate = MailDelegate()
 			let mail = MFMailComposeViewController()
@@ -62,34 +63,14 @@ class WebsiteViewController: UIViewController {
 			let versionNumber = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
 			let buildNumber = Bundle.main.infoDictionary!["CFBundleVersion"] as! String
 			let appVersion = versionNumber + buildNumber
-			mail.setToRecipients(["YourVoice@CentralCoastRadio.org"])
+			let emailAddress = "YourVoice@CentralCoastRadio.org"
+			mail.setToRecipients([emailAddress])
 			mail.setSubject("The Rock App v\(appVersion) Feedback")
-//			let deviceModel = UIDevice.current.model
-//			let systemVersion = UIDevice.current.systemVersion
-//			let userId = (UIApplication.shared.delegate as? AppDelegate)?.driveNetworkingSession.email
-//			let sdkVersion = DriveCore.WrappedSDK.version.sdk
-
 			let messageBody = "\n\n"
-//				"App Version: \(Constants.appVersion)\n" +
-//				"SDK Version: \(sdkVersion)\n" +
-//				"Device Model: \(deviceModel)\n" +
-//				"Type: iOS\n" +
-//				"OS: \(systemVersion)\n" +
-//			"UserId: \(userId ?? "")\n"
-			
 			mail.setMessageBody(messageBody, isHTML: false)
-			
-//			if let filePath = SleepLogService.shared.filePath {
-//				do {
-//					let sleepLogData = try Data(contentsOf: filePath)
-//					mail.addAttachmentData(sleepLogData, mimeType: "text/plain", fileName: "SleepLog.txt")
-//				} catch { }
-//			}
-			
 			present(mail, animated: true)
 		} else {
-			let email = "YourVoice@CentralCoastRadio.org"
-			if let url = URL(string: "mailto:\(email)") {
+			if let url = URL(string: "mailto:\(emailAddress)") {
 				UIApplication.shared.open(url)
 			}
 		}
