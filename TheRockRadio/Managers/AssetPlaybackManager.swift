@@ -56,7 +56,7 @@ class AssetPlaybackManager: NSObject {
 				loggingText = loggingText.add(string: "playerItemObserver item.status = \(item.status.rawValue)")
                 if item.status == .readyToPlay {
                     if !strongSelf.readyForPlayback {
-						loggingText = loggingText.add(string: "playerItem readyToPlay")
+//						loggingText = loggingText.add(string: "playerItem readyToPlay")
                         strongSelf.readyForPlayback = true
 						retryCount = 0
                         strongSelf.delegate?.streamPlaybackManager(strongSelf, playerReadyToPlay: strongSelf.player)
@@ -92,7 +92,7 @@ class AssetPlaybackManager: NSObject {
             urlAssetObserver.invalidate()
         }
         didSet {
-			loggingText = loggingText.add(string: "var asset didSet")
+//			loggingText = loggingText.add(string: "var asset didSet")
             if let asset = asset {
                 urlAssetObserver = asset.urlAsset.observe(\AVURLAsset.isPlayable, options: [.new, .initial]) { [weak self] (urlAsset, _) in
                     guard let strongSelf = self, urlAsset.isPlayable == true else { return }
@@ -100,27 +100,23 @@ class AssetPlaybackManager: NSObject {
 					strongSelf.playerItem = nil
 					strongSelf.player.replaceCurrentItem(with: nil)
 					strongSelf.readyForPlayback = false
-					
-					DispatchQueue.main.async {
-						if TimedMetadataContext != 0 {
-							strongSelf.playerItem?.removeObserver(strongSelf, forKeyPath: "timedMetadata", context: &TimedMetadataContext)
-						}
-						if PlayerContext != 0 {
-							strongSelf.player.removeObserver(strongSelf, forKeyPath: "status", context: &PlayerContext)
-						}
-						if PlayerRateContext != 0 {
-							strongSelf.player.removeObserver(strongSelf, forKeyPath: "rate", context: &PlayerRateContext)
-						}
-					}
-					
                     strongSelf.playerItem = AVPlayerItem(asset: urlAsset)
                     strongSelf.player.replaceCurrentItem(with: strongSelf.playerItem)
 					DispatchQueue.main.async {
-						strongSelf.playerItem?.addObserver(strongSelf, forKeyPath: "timedMetadata", options: [.new], context: &TimedMetadataContext)
-						strongSelf.player.addObserver(strongSelf, forKeyPath: "status", options: [.new], context: &PlayerContext)
-						strongSelf.player.addObserver(strongSelf, forKeyPath: "rate", options: [.new], context: &PlayerRateContext)
+						if TimedMetadataContext == 0 {
+							loggingText = loggingText.add(string: "addObserver forKeyPath: timedMetadata")
+							strongSelf.playerItem?.addObserver(strongSelf, forKeyPath: "timedMetadata", options: [.new], context: &TimedMetadataContext)
+						}
+						if PlayerContext == 0 {
+							loggingText = loggingText.add(string: "addObserver forKeyPath: status")
+							strongSelf.player.addObserver(strongSelf, forKeyPath: "status", options: [.new], context: &PlayerContext)
+						}
+						if PlayerRateContext == 0 {
+							loggingText = loggingText.add(string: "addObserver forKeyPath: rate")
+							strongSelf.player.addObserver(strongSelf, forKeyPath: "rate", options: [.new], context: &PlayerRateContext)
+						}
 					}
-					loggingText = loggingText.add(string: "var asset didSet new PlayerItem")
+//					loggingText = loggingText.add(string: "var asset didSet new PlayerItem")
                 }
             }
             else {
@@ -136,6 +132,7 @@ class AssetPlaybackManager: NSObject {
     // MARK: Intitialization
     override private init() {
         super.init()
+		loggingText = loggingText.add(string: "AssetPlaybackManager init()")
 		// metadata observer
         playerObserver = player.observe(\AVPlayer.currentItem, options: [.new]) { [weak self] (player, _) in
             guard let strongSelf = self else { return }
@@ -145,9 +142,22 @@ class AssetPlaybackManager: NSObject {
     }
     
     deinit {
+		loggingText = loggingText.add(string: "AssetPlaybackManager deinit")
         /// Remove any KVO observer.
         playerObserver?.invalidate()
-    }
+			if TimedMetadataContext != 0 {
+				loggingText = loggingText.add(string: "removeObserver forKeyPath: timedMetadata")
+				self.playerItem?.removeObserver(self, forKeyPath: "timedMetadata", context: &TimedMetadataContext)
+			}
+			if PlayerContext != 0 {
+				loggingText = loggingText.add(string: "removeObserver forKeyPath: status")
+				self.player.removeObserver(self, forKeyPath: "status", context: &PlayerContext)
+			}
+			if PlayerRateContext != 0 {
+				loggingText = loggingText.add(string: "removeObserver forKeyPath: rate")
+				self.player.removeObserver(self, forKeyPath: "rate", context: &PlayerRateContext)
+			}
+	}
 	
 	override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
 		
@@ -191,7 +201,7 @@ class AssetPlaybackManager: NSObject {
      and handle KVO cleanup.
      */
     func setAssetForPlayback(_ asset: Asset?) {
-		loggingText = loggingText.add(string: "setAssetForPlayback")
+//		loggingText = loggingText.add(string: "setAssetForPlayback")
         self.asset = asset
     }	
 }

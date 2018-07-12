@@ -21,6 +21,12 @@ var retryCount = 0
 //var playbackStalled = false
 var lastTimePaused: TimeInterval = Date.timeIntervalSinceReferenceDate
 
+// Now Playing metadata
+var trackTitle = Common.defaultTrackTitle
+var trackArtist = Common.defaultTrackArtist
+var albumArtwork: UIImage = Common.defaultNowPlayingAlbumArtwork
+var playerRate = 0.0
+
 // JSON structure
 struct Collaborator: Decodable {
 	let id: String
@@ -99,16 +105,12 @@ class HomeScreenViewController: UIViewController {
 	
 	fileprivate var playerViewController: AVPlayerViewController?
 	
-	// Common
-	let nowPlayingManager = NowPlayingManager()
-	
 	// UI in the player window
 	var songLabel: UILabel!
 	var currentTrackTitle = Common.defaultTrackTitle
 	var currentTrackArtist = Common.defaultTrackArtist
-	var currentAlbumArtwork: UIImage = Common.defaultAlbumArtwork
+	var currentAlbumArtwork: UIImage = Common.defaultNowPlayingAlbumArtwork
 	var albumArtwork: UIImageView!
-	var albumArtworkURLString = Common.defaultAlbumArtworkURLString
 	
 	var mediaItemArtwork: MPMediaItemArtwork?
 	
@@ -116,7 +118,7 @@ class HomeScreenViewController: UIViewController {
         super.viewDidLoad()
 //		loggingText = loggingText.add(string: "viewDidLoad")
 		
-//		nowPlayingManager.updateNowPlayingWith(title: Common.defaultTrackTitle, artist: Common.defaultTrackArtist, artWork: Common.defaultAlbumArtwork)
+		updateNowPlaying()
 
 		// Set AssetListTableViewController as the delegate for AssetPlaybackManager to recieve playback information.
 		AssetPlaybackManager.sharedManager.delegate = self
@@ -276,12 +278,11 @@ class HomeScreenViewController: UIViewController {
 		
 		if jsonData.currentTrack.artwork_url.absoluteString.contains("images.radio.co/station_logos/s96fbbec3a") {
 			DispatchQueue.main.async {
-				self.albumArtwork.image = Common.defaultAlbumArtwork
-				self.currentAlbumArtwork = Common.defaultAlbumArtwork
-				self.albumArtworkURLString = Common.defaultAlbumArtworkURLString
+				self.albumArtwork.image = Common.defaultNowPlayingAlbumArtwork
+				self.currentAlbumArtwork = Common.defaultNowPlayingAlbumArtwork
+				self.updateNowPlaying()
 			}
 		} else {
-			albumArtworkURLString = jsonData.currentTrack.artwork_url.absoluteString
 			let task = URLSession.shared.dataTask(with: jsonData.currentTrack.artwork_url) { data, response, error in
 				if let error = error {
 					self.handleClientError(error)
@@ -299,6 +300,7 @@ class HomeScreenViewController: UIViewController {
 						loggingText = loggingText.add(string: "updating albumArtwork")
 						self.albumArtwork.image = dataImage
 						self.currentAlbumArtwork = dataImage!
+						self.updateNowPlaying(title: self.currentTrackTitle, artist: self.currentTrackArtist, artWork: self.currentAlbumArtwork)
 					}
 				}
 			}
@@ -345,6 +347,7 @@ class HomeScreenViewController: UIViewController {
 		DispatchQueue.main.async {
 			loggingText = loggingText.add(string: "updating songLabel")
 			self.songLabel.attributedText = displayString
+			self.updateNowPlaying(title: self.currentTrackTitle, artist: self.currentTrackArtist, artWork: self.currentAlbumArtwork)
 		}
 	}
 
@@ -401,8 +404,26 @@ class HomeScreenViewController: UIViewController {
 					// Interruption Ended - playback should NOT resume
 					loggingText = loggingText.add(string: "Interruption Ended DO NOT RESUME")
 				}
+				updateNowPlaying()
 			}
 		}
+	}
+	
+	func updateNowPlaying(title: String = Common.defaultTrackTitle, artist: String = Common.defaultTrackArtist, artWork: UIImage = Common.defaultNowPlayingAlbumArtwork, rate: Double = 0.0) {
+		let albumArtwork = MPMediaItemArtwork.init(boundsSize: artWork.size, requestHandler: { (size) -> UIImage in
+			loggingText = loggingText.add(string: "updateNowPlaying MPMediaItemArtwork")
+			return artWork
+		})
+		
+		let center = MPNowPlayingInfoCenter.default()
+		center.nowPlayingInfo = [
+			MPMediaItemPropertyTitle: title,
+			MPMediaItemPropertyArtist: artist,
+			MPNowPlayingInfoPropertyPlaybackRate: rate,
+			MPMediaItemPropertyArtwork: albumArtwork,
+			//			MPNowPlayingInfoPropertyIsLiveStream: NSNumber(booleanLiteral: true),
+			MPNowPlayingInfoPropertyMediaType: MPNowPlayingInfoMediaType.audio.rawValue,
+		]
 	}
 	
 	@objc
@@ -470,6 +491,7 @@ extension HomeScreenViewController: AssetPlaybackDelegate {
 		songLabel.lineBreakMode = .byTruncatingMiddle
 		songLabel.textAlignment = .center
 		updateSongLabel()
+		updateNowPlaying()
 		
 		// album artwork image
 		rect.origin.x = 0.0
@@ -479,7 +501,7 @@ extension HomeScreenViewController: AssetPlaybackDelegate {
 		albumArtwork = UIImageView.init(frame: rect)
 		albumArtwork.contentMode = .scaleAspectFit
 		albumArtwork.center.x = (playerViewController?.contentOverlayView?.center.x)!
-		albumArtwork.image = Common.defaultAlbumArtwork
+		albumArtwork.image = Common.defaultNowPlayingAlbumArtwork
 
 		// add them to the view
 		playerViewController?.contentOverlayView?.addSubview(albumArtwork)
@@ -494,7 +516,7 @@ extension HomeScreenViewController: AssetPlaybackDelegate {
 		// setup CarPlay Remote Command Events
 //		let isCarPlay = (UI_USER_INTERFACE_IDIOM() == .carPlay)
 //		loggingText = loggingText.add(string: "isCarPlay = \(isCarPlay)")
-//		loggingText = loggingText.add(string: "setup CarPlay Remote Command Events")
+		loggingText = loggingText.add(string: "setup CarPlay Remote Command Events")
 		// Enable Remote Command events
 		MPRemoteCommandCenter.shared().playCommand.isEnabled = true
 		MPRemoteCommandCenter.shared().pauseCommand.isEnabled = true
@@ -504,6 +526,7 @@ extension HomeScreenViewController: AssetPlaybackDelegate {
 			if self.playerViewController?.player?.rate == 0.0 {
 				self.checkAndPlay()
 			}
+			self.updateNowPlaying()
 			return MPRemoteCommandHandlerStatus.success
 		}
 		
@@ -512,6 +535,7 @@ extension HomeScreenViewController: AssetPlaybackDelegate {
 			if self.playerViewController?.player?.rate == 1.0 {
 				self.playerViewController?.player?.pause()
 			}
+			self.updateNowPlaying()
 			return MPRemoteCommandHandlerStatus.success
 		}
 	}
