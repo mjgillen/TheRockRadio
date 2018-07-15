@@ -103,18 +103,12 @@ class AssetPlaybackManager: NSObject {
                     strongSelf.playerItem = AVPlayerItem(asset: urlAsset)
                     strongSelf.player.replaceCurrentItem(with: strongSelf.playerItem)
 					DispatchQueue.main.async {
-						if TimedMetadataContext == 0 {
-							loggingText = loggingText.add(string: "addObserver forKeyPath: timedMetadata")
-							strongSelf.playerItem?.addObserver(strongSelf, forKeyPath: "timedMetadata", options: [.new], context: &TimedMetadataContext)
-						}
-						if PlayerContext == 0 {
-							loggingText = loggingText.add(string: "addObserver forKeyPath: status")
-							strongSelf.player.addObserver(strongSelf, forKeyPath: "status", options: [.new], context: &PlayerContext)
-						}
-						if PlayerRateContext == 0 {
-							loggingText = loggingText.add(string: "addObserver forKeyPath: rate")
-							strongSelf.player.addObserver(strongSelf, forKeyPath: "rate", options: [.new], context: &PlayerRateContext)
-						}
+						loggingText = loggingText.add(string: "addObserver forKeyPath: timedMetadata")
+						strongSelf.playerItem?.addObserver(strongSelf, forKeyPath: "timedMetadata", options: [.new], context: &TimedMetadataContext)
+						loggingText = loggingText.add(string: "addObserver forKeyPath: status")
+						strongSelf.player.addObserver(strongSelf, forKeyPath: "status", options: [.new], context: &PlayerContext)
+						loggingText = loggingText.add(string: "addObserver forKeyPath: rate")
+						strongSelf.player.addObserver(strongSelf, forKeyPath: "rate", options: [.new], context: &PlayerRateContext)
 					}
 //					loggingText = loggingText.add(string: "var asset didSet new PlayerItem")
                 }
@@ -187,11 +181,12 @@ class AssetPlaybackManager: NSObject {
 				loggingText = loggingText.add(string: "observeValue PlayerRate could not get object as AVPlayer")
 				return
 			}
-			let playerRate = thePlayer.rate
+			playerRate = thePlayer.rate
 			loggingText = loggingText.add(string: "observeValue PlayerRate rate = \(playerRate)")
 			if playerRate == 0.0 {
 				lastTimePaused = Date.timeIntervalSinceReferenceDate
 			}
+			Common.updateNowPlaying()
 		}
 	}
 	

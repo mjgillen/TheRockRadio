@@ -25,7 +25,7 @@ var lastTimePaused: TimeInterval = Date.timeIntervalSinceReferenceDate
 var trackTitle = Common.defaultTrackTitle
 var trackArtist = Common.defaultTrackArtist
 var albumArtwork: UIImage = Common.defaultNowPlayingAlbumArtwork
-var playerRate = 0.0
+var playerRate: Float = 0.0
 
 // JSON structure
 struct Collaborator: Decodable {
@@ -106,19 +106,13 @@ class HomeScreenViewController: UIViewController {
 	fileprivate var playerViewController: AVPlayerViewController?
 	
 	// UI in the player window
-	var songLabel: UILabel!
-	var currentTrackTitle = Common.defaultTrackTitle
-	var currentTrackArtist = Common.defaultTrackArtist
-	var currentAlbumArtwork: UIImage = Common.defaultNowPlayingAlbumArtwork
-	var albumArtwork: UIImageView!
-	
-	var mediaItemArtwork: MPMediaItemArtwork?
+	var playerWindowSongLabel: UILabel!
+	var playerWindowAlbumArtwork: UIImageView!
 	
     override func viewDidLoad() {
         super.viewDidLoad()
-//		loggingText = loggingText.add(string: "viewDidLoad")
-		
-		updateNowPlaying()
+//		self.becomeFirstResponder()
+//		Common.updateNowPlaying()
 
 		// Set AssetListTableViewController as the delegate for AssetPlaybackManager to recieve playback information.
 		AssetPlaybackManager.sharedManager.delegate = self
@@ -126,7 +120,6 @@ class HomeScreenViewController: UIViewController {
 		let notificationCenter = NotificationCenter.default
 		// inter process commmunication
 		notificationCenter.addObserver(self, selector: #selector(HomeScreenViewController.handleNewSongNotification), name: NSNotification.Name(rawValue: "ObservedObjectSongName"), object: nil)
-		notificationCenter.addObserver(self, selector: #selector(restartStream), name: NSNotification.Name(rawValue: "RestartStream"), object: nil)
 		notificationCenter.addObserver(self, selector: #selector(reloadURL), name: NSNotification.Name(rawValue: "ReloadURL"), object: nil)
 
 		// handle interruptions
@@ -136,20 +129,17 @@ class HomeScreenViewController: UIViewController {
 		}
 	}
 
-	override func viewWillAppear(_ animated: Bool) {
-//		loggingText = loggingText.add(string: "viewWillAppear")
-		super.viewWillAppear(animated)
-//		NotificationCenter.default.post(name: NSNotification.Name("RestartStream"), object: nil)
-	}
-
 	override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
     }
 	
 	override var prefersStatusBarHidden: Bool {
 		return false
 	}
+	
+//	override var canBecomeFirstResponder: Bool {
+//		return true
+//	}
 	
 	override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
 		return .portrait
@@ -170,25 +160,6 @@ class HomeScreenViewController: UIViewController {
 			let asset = Asset.init(stream: stream!, urlAsset: urlAsset)
 			AssetPlaybackManager.sharedManager.setAssetForPlayback(asset)
 		}
-	}
-	
-	@objc func restartStream(notification: NSNotification) {
-		loggingText = loggingText.add(string: "restartStream")
-
-		// if not yet setup bail
-		if !avPlayerVCisReady {
-			loggingText = loggingText.add(string: "restartStream avPlayerVCisReady NOT ready")
-			return
-		}
-		guard playerViewController?.player != nil else {
-			loggingText = loggingText.add(string: "restartStream playerViewController?.player is nil")
-			loggingText = loggingText.add(string: "restartStream calling reloadURL")
-			reloadURL()
-			return
-		}
-		loggingText = loggingText.add(string: "restartStream player.play()")
-		checkAndPlay()
-		getStationPlaylistInfo()
 	}
 	
 	@objc func reloadURL() {
@@ -229,12 +200,10 @@ class HomeScreenViewController: UIViewController {
 	}
 	
 	@objc func handleNewSongNotification(notification: NSNotification) {
-//		loggingText = loggingText.add(string: "handleNewSongNotification")
 		getStationPlaylistInfo()
 	}
 	
 	func getStationPlaylistInfo() {
-//		loggingText = loggingText.add(string: "getStationPlaylistInfo")
 		let radioURL = URL.init(string: Common.playlistURL)
 		let task = URLSession.shared.dataTask(with: radioURL!) { data, response, error in
 			if let error = error {
@@ -264,23 +233,23 @@ class HomeScreenViewController: UIViewController {
 	func processJSON(_ jsonData: RadioJSON) {
 		
 		loggingText = loggingText.add(string: "processJSON")
-		(currentTrackTitle, currentTrackArtist) = sliceJSONSongString(songString: jsonData.currentTrack.title)
-		if currentTrackTitle == "Unknown" || currentTrackTitle == "" {
-			currentTrackTitle = Common.defaultTrackTitle
-			currentTrackArtist = Common.defaultTrackArtist
+		(trackTitle, trackArtist) = sliceJSONSongString(songString: jsonData.currentTrack.title)
+		if trackTitle == "Unknown" || trackTitle == "" {
+			trackTitle = Common.defaultTrackTitle
+			trackArtist = Common.defaultTrackArtist
 		}
 		
-		if currentTrackArtist == "" {
-			currentTrackArtist = Common.defaultTrackArtist
+		if trackArtist == "" {
+			trackArtist = Common.defaultTrackArtist
 		}
 		
 		updateSongLabel()
 		
 		if jsonData.currentTrack.artwork_url.absoluteString.contains("images.radio.co/station_logos/s96fbbec3a") {
 			DispatchQueue.main.async {
-				self.albumArtwork.image = Common.defaultNowPlayingAlbumArtwork
-				self.currentAlbumArtwork = Common.defaultNowPlayingAlbumArtwork
-				self.updateNowPlaying()
+				self.playerWindowAlbumArtwork.image = Common.defaultNowPlayingAlbumArtwork
+				albumArtwork = Common.defaultNowPlayingAlbumArtwork
+				Common.updateNowPlaying()
 			}
 		} else {
 			let task = URLSession.shared.dataTask(with: jsonData.currentTrack.artwork_url) { data, response, error in
@@ -298,9 +267,9 @@ class HomeScreenViewController: UIViewController {
 					let dataImage = UIImage.init(data: data)
 					DispatchQueue.main.async {
 						loggingText = loggingText.add(string: "updating albumArtwork")
-						self.albumArtwork.image = dataImage
-						self.currentAlbumArtwork = dataImage!
-						self.updateNowPlaying(title: self.currentTrackTitle, artist: self.currentTrackArtist, artWork: self.currentAlbumArtwork)
+						self.playerWindowAlbumArtwork.image = dataImage
+						albumArtwork = dataImage!
+						Common.updateNowPlaying()
 					}
 				}
 			}
@@ -337,17 +306,17 @@ class HomeScreenViewController: UIViewController {
 			NSAttributedStringKey.foregroundColor : UIColor.black,
 			NSAttributedStringKey.font : UIFont.systemFont(ofSize: 30)
 		]
-		let displayString = NSMutableAttributedString.init(string: currentTrackTitle + "\n", attributes: titleAttributes)
+		let displayString = NSMutableAttributedString.init(string: trackTitle + "\n", attributes: titleAttributes)
 		let artistAttributes = [
 			NSAttributedStringKey.foregroundColor : UIColor.red,
 			NSAttributedStringKey.font : UIFont.systemFont(ofSize: 20)
 		]
-		displayString.append(NSAttributedString.init(string: currentTrackArtist, attributes: artistAttributes))
+		displayString.append(NSAttributedString.init(string: trackArtist, attributes: artistAttributes))
 		
 		DispatchQueue.main.async {
 			loggingText = loggingText.add(string: "updating songLabel")
-			self.songLabel.attributedText = displayString
-			self.updateNowPlaying(title: self.currentTrackTitle, artist: self.currentTrackArtist, artWork: self.currentAlbumArtwork)
+			self.playerWindowSongLabel.attributedText = displayString
+			Common.updateNowPlaying()
 		}
 	}
 
@@ -404,30 +373,12 @@ class HomeScreenViewController: UIViewController {
 					// Interruption Ended - playback should NOT resume
 					loggingText = loggingText.add(string: "Interruption Ended DO NOT RESUME")
 				}
-				updateNowPlaying()
 			}
 		}
+//		Common.updateNowPlaying()
 	}
 	
-	func updateNowPlaying(title: String = Common.defaultTrackTitle, artist: String = Common.defaultTrackArtist, artWork: UIImage = Common.defaultNowPlayingAlbumArtwork, rate: Double = 0.0) {
-		let albumArtwork = MPMediaItemArtwork.init(boundsSize: artWork.size, requestHandler: { (size) -> UIImage in
-			loggingText = loggingText.add(string: "updateNowPlaying MPMediaItemArtwork")
-			return artWork
-		})
-		
-		let center = MPNowPlayingInfoCenter.default()
-		center.nowPlayingInfo = [
-			MPMediaItemPropertyTitle: title,
-			MPMediaItemPropertyArtist: artist,
-			MPNowPlayingInfoPropertyPlaybackRate: rate,
-			MPMediaItemPropertyArtwork: albumArtwork,
-			//			MPNowPlayingInfoPropertyIsLiveStream: NSNumber(booleanLiteral: true),
-			MPNowPlayingInfoPropertyMediaType: MPNowPlayingInfoMediaType.audio.rawValue,
-		]
-	}
-	
-	@objc
-	func handleRouteChange(notification: Notification) {
+	@objc func handleRouteChange(notification: Notification) {
 		guard let userInfo = notification.userInfo,
 			let reasonValue = userInfo[AVAudioSessionRouteChangeReasonKey] as? UInt,
 			let reason = AVAudioSessionRouteChangeReason(rawValue:reasonValue) else {
@@ -478,34 +429,37 @@ extension HomeScreenViewController: AssetPlaybackDelegate {
 		playerViewController?.updatesNowPlayingInfoCenter = true
 		playerViewController?.contentOverlayView?.backgroundColor = .white
 		
-		// setup the label
 		let pvcWidth = Double((playerViewController?.contentOverlayView?.frame.width)!)
 		let pvcHeight = Double((playerViewController?.contentOverlayView?.frame.height)!)
 		let offsetX = 10.0
 		let offsetY = pvcHeight - 125.0
 		var rect = CGRect(x: offsetX, y: offsetY, width: pvcWidth - offsetX, height: 75.0)
-		songLabel = UILabel.init(frame: rect)
-		songLabel.text = ""
-		songLabel.font = UIFont.systemFont(ofSize: 30.0)
-		songLabel.numberOfLines = 2
-		songLabel.lineBreakMode = .byTruncatingMiddle
-		songLabel.textAlignment = .center
-		updateSongLabel()
-		updateNowPlaying()
 		
-		// album artwork image
-		rect.origin.x = 0.0
-		rect.origin.y = 5.0
-		rect.size.width = CGFloat(pvcWidth / 2.0)
-		rect.size.height = CGFloat(pvcHeight / 2.0)
-		albumArtwork = UIImageView.init(frame: rect)
-		albumArtwork.contentMode = .scaleAspectFit
-		albumArtwork.center.x = (playerViewController?.contentOverlayView?.center.x)!
-		albumArtwork.image = Common.defaultNowPlayingAlbumArtwork
-
-		// add them to the view
-		playerViewController?.contentOverlayView?.addSubview(albumArtwork)
-		playerViewController?.contentOverlayView?.addSubview(songLabel)
+		if playerWindowSongLabel == nil {
+			// setup the label
+			playerWindowSongLabel = UILabel.init(frame: rect)
+			playerWindowSongLabel.text = ""
+			playerWindowSongLabel.font = UIFont.systemFont(ofSize: 30.0)
+			playerWindowSongLabel.numberOfLines = 2
+			playerWindowSongLabel.lineBreakMode = .byTruncatingMiddle
+			playerWindowSongLabel.textAlignment = .center
+			// add to the view
+			playerViewController?.contentOverlayView?.addSubview(playerWindowSongLabel)
+			updateSongLabel()
+		}
+		if playerWindowAlbumArtwork == nil {
+			// album artwork image
+			rect.origin.x = 0.0
+			rect.origin.y = 5.0
+			rect.size.width = CGFloat(pvcWidth / 2.0)
+			rect.size.height = CGFloat(pvcHeight / 2.0)
+			playerWindowAlbumArtwork = UIImageView.init(frame: rect)
+			playerWindowAlbumArtwork.contentMode = .scaleAspectFit
+			playerWindowAlbumArtwork.center.x = (playerViewController?.contentOverlayView?.center.x)!
+			playerWindowAlbumArtwork.image = Common.defaultNowPlayingAlbumArtwork
+			// add to the view
+			playerViewController?.contentOverlayView?.addSubview(playerWindowAlbumArtwork)
+		}
 		
 		// start playing the stream
 		loggingText = loggingText.add(string: "playerReadyToPlay: start playing the stream")
@@ -526,7 +480,7 @@ extension HomeScreenViewController: AssetPlaybackDelegate {
 			if self.playerViewController?.player?.rate == 0.0 {
 				self.checkAndPlay()
 			}
-			self.updateNowPlaying()
+//			Common.updateNowPlaying()
 			return MPRemoteCommandHandlerStatus.success
 		}
 		
@@ -535,9 +489,10 @@ extension HomeScreenViewController: AssetPlaybackDelegate {
 			if self.playerViewController?.player?.rate == 1.0 {
 				self.playerViewController?.player?.pause()
 			}
-			self.updateNowPlaying()
+//			Common.updateNowPlaying()
 			return MPRemoteCommandHandlerStatus.success
 		}
+//		Common.updateNowPlaying()
 	}
 	
 	func streamPlaybackManager(_ streamPlaybackManager: AssetPlaybackManager,

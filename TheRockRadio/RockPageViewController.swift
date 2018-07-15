@@ -12,7 +12,7 @@ class RockPageViewController: UIPageViewController {
 
 	private(set) lazy var orderedViewControllers: [UIViewController] = { // Website RSS RecentlyPlayed Logger
 		return [
-			self.newViewControllerWith(name: "Logger"),
+//			self.newViewControllerWith(name: "Logger"),
 			self.newViewControllerWith(name: "Website"),
 			self.newViewControllerWith(name: "RSS"),
 //			self.newViewControllerWith(name: "RecentlyPlayed"),

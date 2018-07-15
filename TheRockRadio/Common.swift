@@ -17,20 +17,20 @@ class Common: NSObject {
 	static let streamingURL = "https://streaming.radio.co/s96fbbec3a/listen"
 	static let playlistURL = "https://public.radio.co/stations/s96fbbec3a/status"
 
-//	class func updateNowPlaying(title: String = Common.defaultTrackTitle, artist: String = Common.defaultTrackArtist, artWork: UIImage = Common.defaultNowPlayingAlbumArtwork, rate: Double = 0.0) {
 	class func updateNowPlaying() {
+		loggingText = loggingText.add(string: "updateNowPlaying CALLED")
 		let artwork = MPMediaItemArtwork.init(boundsSize: albumArtwork.size, requestHandler: { (size) -> UIImage in
-			loggingText = loggingText.add(string: "updateNowPlaying MPMediaItemArtwork")
+			loggingText = loggingText.add(string: "updateNowPlaying IN BLOCK")
 			return albumArtwork
 		})
-		
+
 		let center = MPNowPlayingInfoCenter.default()
 		center.nowPlayingInfo = [
 			MPMediaItemPropertyTitle: trackTitle,
 			MPMediaItemPropertyArtist: trackArtist,
 			MPNowPlayingInfoPropertyPlaybackRate: playerRate,
 			MPMediaItemPropertyArtwork: artwork,
-			//			MPNowPlayingInfoPropertyIsLiveStream: NSNumber(booleanLiteral: true),
+//			MPNowPlayingInfoPropertyIsLiveStream: NSNumber(booleanLiteral: true),
 			MPNowPlayingInfoPropertyMediaType: MPNowPlayingInfoMediaType.audio.rawValue,
 		]
 	}
