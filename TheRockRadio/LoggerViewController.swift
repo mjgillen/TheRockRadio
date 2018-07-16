@@ -14,8 +14,8 @@ class LoggerViewController: UIViewController {
 	
 	override func viewDidLoad() {
         super.viewDidLoad()
-		self.scrollView.addSubview(loggingLabel)
-		loggingLabel.numberOfLines = 0
+//		self.scrollView.addSubview(loggingLabel)
+//		loggingLabel.numberOfLines = 0
     }
 	
 	override func viewWillAppear(_ animated: Bool) {
@@ -23,7 +23,7 @@ class LoggerViewController: UIViewController {
 	}
 	
 	override func viewDidLayoutSubviews() {
-		loggingLabel.frame = self.view.frame
+//		loggingLabel.frame = self.view.frame
 		scrollView.contentSize = CGSize(width: self.view.frame.width, height: 10000)
 	}
 

@@ -53,7 +53,7 @@ class AssetPlaybackManager: NSObject {
         didSet {
             playerItemObserver = playerItem?.observe(\AVPlayerItem.status, options: [.new, .initial]) { [weak self] (item, _) in
                 guard let strongSelf = self else { return }
-				loggingText = loggingText.add(string: "playerItemObserver item.status = \(item.status.rawValue)")
+//				loggingText = loggingText.add(string: "playerItemObserver item.status = \(item.status.rawValue)")
                 if item.status == .readyToPlay {
                     if !strongSelf.readyForPlayback {
 //						loggingText = loggingText.add(string: "playerItem readyToPlay")
@@ -62,17 +62,17 @@ class AssetPlaybackManager: NSObject {
                         strongSelf.delegate?.streamPlaybackManager(strongSelf, playerReadyToPlay: strongSelf.player)
                     }
                 } else if item.status == .failed {
-                    let error = item.error
-					loggingText = loggingText.add(string: "playerItemObserver item.status = .failed")
-					loggingText = loggingText.add(string: "playerItemObserver error loading asset = \(String(describing: error?.localizedDescription))")
+//                    let error = item.error
+//					loggingText = loggingText.add(string: "playerItemObserver item.status = .failed")
+//					loggingText = loggingText.add(string: "playerItemObserver error loading asset = \(String(describing: error?.localizedDescription))")
 					// try to recover
 					if retryCount < 15 {
 						retryCount += 1
-						loggingText = loggingText.add(string: "playerItemObserver error retrying)")
+//						loggingText = loggingText.add(string: "playerItemObserver error retrying)")
 						self?.perform(#selector(self?.postReloadNotification), with: nil, afterDelay: Double(retryCount))
 					} else {
 						// $TODO: retried a bunch now what?
-						loggingText = loggingText.add(string: "playerItemObserver error 15 RETRIES exhausted)")
+//						loggingText = loggingText.add(string: "playerItemObserver error 15 RETRIES exhausted)")
 					}
                 }
 			}
@@ -103,11 +103,11 @@ class AssetPlaybackManager: NSObject {
                     strongSelf.playerItem = AVPlayerItem(asset: urlAsset)
                     strongSelf.player.replaceCurrentItem(with: strongSelf.playerItem)
 					DispatchQueue.main.async {
-						loggingText = loggingText.add(string: "addObserver forKeyPath: timedMetadata")
+//						loggingText = loggingText.add(string: "addObserver forKeyPath: timedMetadata")
 						strongSelf.playerItem?.addObserver(strongSelf, forKeyPath: "timedMetadata", options: [.new], context: &TimedMetadataContext)
-						loggingText = loggingText.add(string: "addObserver forKeyPath: status")
+//						loggingText = loggingText.add(string: "addObserver forKeyPath: status")
 						strongSelf.player.addObserver(strongSelf, forKeyPath: "status", options: [.new], context: &PlayerContext)
-						loggingText = loggingText.add(string: "addObserver forKeyPath: rate")
+//						loggingText = loggingText.add(string: "addObserver forKeyPath: rate")
 						strongSelf.player.addObserver(strongSelf, forKeyPath: "rate", options: [.new], context: &PlayerRateContext)
 					}
 //					loggingText = loggingText.add(string: "var asset didSet new PlayerItem")
@@ -117,7 +117,7 @@ class AssetPlaybackManager: NSObject {
                 playerItem = nil
                 player.replaceCurrentItem(with: nil)
                 readyForPlayback = false
-				loggingText = loggingText.add(string: "var asset didSet FAILED")
+//				loggingText = loggingText.add(string: "var asset didSet FAILED")
 				// $TODO: put up an alert to try again.
             }
         }
@@ -126,7 +126,7 @@ class AssetPlaybackManager: NSObject {
     // MARK: Intitialization
     override private init() {
         super.init()
-		loggingText = loggingText.add(string: "AssetPlaybackManager init()")
+//		loggingText = loggingText.add(string: "AssetPlaybackManager init()")
 		// metadata observer
         playerObserver = player.observe(\AVPlayer.currentItem, options: [.new]) { [weak self] (player, _) in
             guard let strongSelf = self else { return }
@@ -136,19 +136,19 @@ class AssetPlaybackManager: NSObject {
     }
     
     deinit {
-		loggingText = loggingText.add(string: "AssetPlaybackManager deinit")
+//		loggingText = loggingText.add(string: "AssetPlaybackManager deinit")
         /// Remove any KVO observer.
         playerObserver?.invalidate()
 			if TimedMetadataContext != 0 {
-				loggingText = loggingText.add(string: "removeObserver forKeyPath: timedMetadata")
+//				loggingText = loggingText.add(string: "removeObserver forKeyPath: timedMetadata")
 				self.playerItem?.removeObserver(self, forKeyPath: "timedMetadata", context: &TimedMetadataContext)
 			}
 			if PlayerContext != 0 {
-				loggingText = loggingText.add(string: "removeObserver forKeyPath: status")
+//				loggingText = loggingText.add(string: "removeObserver forKeyPath: status")
 				self.player.removeObserver(self, forKeyPath: "status", context: &PlayerContext)
 			}
 			if PlayerRateContext != 0 {
-				loggingText = loggingText.add(string: "removeObserver forKeyPath: rate")
+//				loggingText = loggingText.add(string: "removeObserver forKeyPath: rate")
 				self.player.removeObserver(self, forKeyPath: "rate", context: &PlayerRateContext)
 			}
 	}
@@ -156,7 +156,7 @@ class AssetPlaybackManager: NSObject {
 	override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
 		
 		if context == &TimedMetadataContext {
-			loggingText = loggingText.add(string: "observeValue TimedMetadataContext")
+//			loggingText = loggingText.add(string: "observeValue TimedMetadataContext")
 			guard let observedObject: AVPlayerItem = object as? AVPlayerItem else { return }
 			guard (observedObject.timedMetadata != nil) else { return }
 			for metadata in observedObject.timedMetadata! {
@@ -166,23 +166,23 @@ class AssetPlaybackManager: NSObject {
 			}
 		} else
 		if context == &PlayerContext {
-			loggingText = loggingText.add(string: "observeValue PlayerContext")
+//			loggingText = loggingText.add(string: "observeValue PlayerContext")
 			guard let thePlayer: AVPlayer = object as? AVPlayer else {
-				loggingText = loggingText.add(string: "observeValue PlayerContext could not get object as AVPlayer")
+//				loggingText = loggingText.add(string: "observeValue PlayerContext could not get object as AVPlayer")
 				return
 			}
 			let status = thePlayer.status
 			if status == .failed {
-				loggingText = loggingText.add(string: "observeValue PlayerContext status = .failed")
+//				loggingText = loggingText.add(string: "observeValue PlayerContext status = .failed")
 			}
 		} else if context == &PlayerRateContext {
-			loggingText = loggingText.add(string: "observeValue PlayerRateContext")
+//			loggingText = loggingText.add(string: "observeValue PlayerRateContext")
 			guard let thePlayer: AVPlayer = object as? AVPlayer else {
-				loggingText = loggingText.add(string: "observeValue PlayerRate could not get object as AVPlayer")
+//				loggingText = loggingText.add(string: "observeValue PlayerRate could not get object as AVPlayer")
 				return
 			}
 			playerRate = thePlayer.rate
-			loggingText = loggingText.add(string: "observeValue PlayerRate rate = \(playerRate)")
+//			loggingText = loggingText.add(string: "observeValue PlayerRate rate = \(playerRate)")
 			if playerRate == 0.0 {
 				lastTimePaused = Date.timeIntervalSinceReferenceDate
 			}

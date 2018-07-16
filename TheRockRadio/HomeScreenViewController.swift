@@ -11,9 +11,9 @@ import AVKit
 import MediaPlayer
 import SystemConfiguration
 
-// Logging
-var loggingText = ""
-var loggingLabel = UILabel()
+//// Logging
+//var loggingText = ""
+//var loggingLabel = UILabel()
 
 // state flags
 var avPlayerVCisReady = true
@@ -163,38 +163,38 @@ class HomeScreenViewController: UIViewController {
 	}
 	
 	@objc func reloadURL() {
-		loggingText = loggingText.add(string: "reloadURL")
+//		loggingText = loggingText.add(string: "reloadURL")
 		
 		// if not yet setup bail
 		if !avPlayerVCisReady {
-			loggingText = loggingText.add(string: "reloadURL avPlayerVCisReady NOT ready")
+//			loggingText = loggingText.add(string: "reloadURL avPlayerVCisReady NOT ready")
 			return
 		}
 
 		// Reactivate the Audio Session
 		do {
-			loggingText = loggingText.add(string: "reloadURL-> AVAudioSession.setActive")
+//			loggingText = loggingText.add(string: "reloadURL-> AVAudioSession.setActive")
 			try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback)
 			try AVAudioSession.sharedInstance().setActive(true)
 			
-			loggingText = loggingText.add(string: "reloadURL-> AVAudioSession.setActive = TRUE")
+//			loggingText = loggingText.add(string: "reloadURL-> AVAudioSession.setActive = TRUE")
 			
 			// Load the Asset to playback into AssetPlaybackManager.
-			loggingText = loggingText.add(string: "reloadURL reloading asset")
+//			loggingText = loggingText.add(string: "reloadURL reloading asset")
 			let urlAsset = AVURLAsset.init(url: URL.init(string: Common.streamingURL)!)
 			let stream = StreamListManager.shared.streams.first
 			let asset = Asset.init(stream: stream!, urlAsset: urlAsset)
 			AssetPlaybackManager.sharedManager.setAssetForPlayback(asset)
 			retryCount = 0
 		} catch  {
-			loggingText = loggingText.add(string: "reloadURL-> AVAudioSession.sharedInstance().setCategory error = \(error)")
+//			loggingText = loggingText.add(string: "reloadURL-> AVAudioSession.sharedInstance().setCategory error = \(error)")
 			if retryCount < 15 {
 				retryCount += 1
-				loggingText = loggingText.add(string: "reloadURL-> retrying")
+//				loggingText = loggingText.add(string: "reloadURL-> retrying")
 				self.perform(#selector(reloadURL), with: nil, afterDelay: 2.0)
 			} else {
 				retryCount = 0
-				loggingText = loggingText.add(string: "reloadURL error 15 RETRIES exhausted)")
+//				loggingText = loggingText.add(string: "reloadURL error 15 RETRIES exhausted)")
 			}
 		}
 	}
@@ -232,7 +232,7 @@ class HomeScreenViewController: UIViewController {
 	
 	func processJSON(_ jsonData: RadioJSON) {
 		
-		loggingText = loggingText.add(string: "processJSON")
+//		loggingText = loggingText.add(string: "processJSON")
 		(trackTitle, trackArtist) = sliceJSONSongString(songString: jsonData.currentTrack.title)
 		if trackTitle == "Unknown" || trackTitle == "" {
 			trackTitle = Common.defaultTrackTitle
@@ -266,7 +266,7 @@ class HomeScreenViewController: UIViewController {
 				if let data = data {
 					let dataImage = UIImage.init(data: data)
 					DispatchQueue.main.async {
-						loggingText = loggingText.add(string: "updating albumArtwork")
+//						loggingText = loggingText.add(string: "updating albumArtwork")
 						self.playerWindowAlbumArtwork.image = dataImage
 						albumArtwork = dataImage!
 						Common.updateNowPlaying()
@@ -314,35 +314,35 @@ class HomeScreenViewController: UIViewController {
 		displayString.append(NSAttributedString.init(string: trackArtist, attributes: artistAttributes))
 		
 		DispatchQueue.main.async {
-			loggingText = loggingText.add(string: "updating songLabel")
+//			loggingText = loggingText.add(string: "updating songLabel")
 			self.playerWindowSongLabel.attributedText = displayString
 			Common.updateNowPlaying()
 		}
 	}
 
 	func checkAndPlay() {
-		loggingText = loggingText.add(string: "checkAndPlay()")
+//		loggingText = loggingText.add(string: "checkAndPlay()")
 		let now = Date.timeIntervalSinceReferenceDate
 		let interval = now - lastTimePaused
-		loggingText = loggingText.add(string: String(format: "checkAndPlay() time was %.1f", interval))
+//		loggingText = loggingText.add(string: String(format: "checkAndPlay() time was %.1f", interval))
 		if interval > 5.0 {
-			loggingText = loggingText.add(string: "checkAndPlay() reloadingURL()")
+//			loggingText = loggingText.add(string: "checkAndPlay() reloadingURL()")
 			reloadURL()
 		} else {
-			loggingText = loggingText.add(string: "checkAndPlay() player.play()")
+//			loggingText = loggingText.add(string: "checkAndPlay() player.play()")
 			self.playerViewController?.player?.play()
 		}
 	}
 	
 	func handleClientError(_ error: Error) {
-		loggingText = loggingText.add(string: "handleClientError")
+//		loggingText = loggingText.add(string: "handleClientError")
 }
 	func handleServerError(_ response: URLResponse?) {
-		loggingText = loggingText.add(string: "handleServerError")
+//		loggingText = loggingText.add(string: "handleServerError")
 	}
 
 	@objc func handleInterruption(notification: Notification) { // kAudioSessionProperty_ServerDied
-		loggingText = loggingText.add(string: "handleInterruption notification")
+//		loggingText = loggingText.add(string: "handleInterruption notification")
 		guard let userInfo = notification.userInfo,
 			let typeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
 			let type = AVAudioSessionInterruptionType(rawValue: typeValue) else {
@@ -351,11 +351,11 @@ class HomeScreenViewController: UIViewController {
 		guard let playerViewController = playerViewController else { return }
 		if type == .began {
 			// Interruption began, take appropriate actions
-			loggingText = loggingText.add(string: "Interruption began")
+//			loggingText = loggingText.add(string: "Interruption began")
 
 			if playerViewController.player?.rate == 1.0 {
 				playerViewController.player?.pause()
-				loggingText = loggingText.add(string: "Interruption pause()")
+//				loggingText = loggingText.add(string: "Interruption pause()")
 			}
 		}
 		else if type == .ended {
@@ -363,15 +363,15 @@ class HomeScreenViewController: UIViewController {
 				let options = AVAudioSessionInterruptionOptions(rawValue: optionsValue)
 				if options.contains(.shouldResume) {
 					// Interruption Ended - playback should resume
-					loggingText = loggingText.add(string: "Interruption Ended")
+//					loggingText = loggingText.add(string: "Interruption Ended")
 
 					if playerViewController.player?.rate == 0.0 {
 						checkAndPlay()
-						loggingText = loggingText.add(string: "Interruption play()")
+//						loggingText = loggingText.add(string: "Interruption play()")
 					}
 				} else {
 					// Interruption Ended - playback should NOT resume
-					loggingText = loggingText.add(string: "Interruption Ended DO NOT RESUME")
+//					loggingText = loggingText.add(string: "Interruption Ended DO NOT RESUME")
 				}
 			}
 		}
@@ -384,24 +384,26 @@ class HomeScreenViewController: UIViewController {
 			let reason = AVAudioSessionRouteChangeReason(rawValue:reasonValue) else {
 				return
 		}
-		loggingText = loggingText.add(string: "handleRouteChange")
+//		loggingText = loggingText.add(string: "handleRouteChange")
 		switch reason {
 		case .newDeviceAvailable:
 			
 			// do not automatically start playing.
-			loggingText = loggingText.add(string: "handleRouteChange newDeviceAvailable")
+//			loggingText = loggingText.add(string: "handleRouteChange newDeviceAvailable")
 
-			let session = AVAudioSession.sharedInstance()
+//			let session = AVAudioSession.sharedInstance()
 //			for output in session.currentRoute.outputs where output.portType == AVAudioSessionPortHeadphones {
 //				headphonesConnected = true
 //				break
 //			}
-			for output in session.currentRoute.outputs {
-				loggingText = loggingText.add(string: "handleRouteChange output = \(output.portType)")
-				break
-			}
+//			for output in session.currentRoute.outputs {
+//				loggingText = loggingText.add(string: "handleRouteChange output = \(output.portType)")
+//				break
+//			}
+			break
 		case .oldDeviceUnavailable:
-			loggingText = loggingText.add(string: "handleRouteChange oldDeviceUnavailable")
+			break
+//			loggingText = loggingText.add(string: "handleRouteChange oldDeviceUnavailable")
 
 //			if let previousRoute =
 //				userInfo[AVAudioSessionRouteChangePreviousRouteKey] as? AVAudioSessionRouteDescription {
@@ -411,7 +413,7 @@ class HomeScreenViewController: UIViewController {
 //				}
 //			}
 		default: ()
-			loggingText = loggingText.add(string: "handleRouteChange default")
+//			loggingText = loggingText.add(string: "handleRouteChange default")
 		}
 	}
 }
@@ -419,7 +421,7 @@ class HomeScreenViewController: UIViewController {
 extension HomeScreenViewController: AssetPlaybackDelegate {
 	func streamPlaybackManager(_ streamPlaybackManager: AssetPlaybackManager, playerReadyToPlay player: AVPlayer) {
 		
-		loggingText = loggingText.add(string: "streamPlaybackManager: playerReadyToPlay")
+//		loggingText = loggingText.add(string: "streamPlaybackManager: playerReadyToPlay")
 
 		// $TODO: do we need to tell CarPlay we are ready?
 		playerViewController?.player = player
@@ -462,7 +464,7 @@ extension HomeScreenViewController: AssetPlaybackDelegate {
 		}
 		
 		// start playing the stream
-		loggingText = loggingText.add(string: "playerReadyToPlay: start playing the stream")
+//		loggingText = loggingText.add(string: "playerReadyToPlay: start playing the stream")
 		player.play()
 		// tell everyone it started playing
 		NotificationCenter.default.post(name: NSNotification.Name(rawValue: "PlayerStartedPlaying"), object: nil)
@@ -470,13 +472,13 @@ extension HomeScreenViewController: AssetPlaybackDelegate {
 		// setup CarPlay Remote Command Events
 //		let isCarPlay = (UI_USER_INTERFACE_IDIOM() == .carPlay)
 //		loggingText = loggingText.add(string: "isCarPlay = \(isCarPlay)")
-		loggingText = loggingText.add(string: "setup CarPlay Remote Command Events")
+//		loggingText = loggingText.add(string: "setup CarPlay Remote Command Events")
 		// Enable Remote Command events
 		MPRemoteCommandCenter.shared().playCommand.isEnabled = true
 		MPRemoteCommandCenter.shared().pauseCommand.isEnabled = true
 		let commandCenter = MPRemoteCommandCenter.shared()
 		commandCenter.playCommand.addTarget { (event) -> MPRemoteCommandHandlerStatus in
-			loggingText = loggingText.add(string: "commandCenter.playCommand")
+//			loggingText = loggingText.add(string: "commandCenter.playCommand")
 			if self.playerViewController?.player?.rate == 0.0 {
 				self.checkAndPlay()
 			}
@@ -485,7 +487,7 @@ extension HomeScreenViewController: AssetPlaybackDelegate {
 		}
 		
 		commandCenter.pauseCommand.addTarget { (event) -> MPRemoteCommandHandlerStatus in
-			loggingText = loggingText.add(string: "commandCenter.pauseCommand")
+//			loggingText = loggingText.add(string: "commandCenter.pauseCommand")
 			if self.playerViewController?.player?.rate == 1.0 {
 				self.playerViewController?.player?.pause()
 			}
@@ -497,28 +499,28 @@ extension HomeScreenViewController: AssetPlaybackDelegate {
 	
 	func streamPlaybackManager(_ streamPlaybackManager: AssetPlaybackManager,
 							   playerCurrentItemDidChange player: AVPlayer) {
-		loggingText = loggingText.add(string: "playerCurrentItemDidChange")
+//		loggingText = loggingText.add(string: "playerCurrentItemDidChange")
 		guard let playerViewController = playerViewController, player.currentItem != nil else { return }
 		playerViewController.player = player
 	}
 }
 
-// add strings together = append. this is a continuous logging string
-extension String {
-	func add(string: String) -> String {
-		let dateFormatter = DateFormatter()
-		dateFormatter.dateFormat = "h:mm"
-		let dateString = dateFormatter.string(from: Date())
-		var newString = self + "  " + dateString
-		newString = newString + " " + string + "\n"
-		DispatchQueue.main.async {
-			let oldWidth = loggingLabel.frame.size.width
-			loggingLabel.text = newString
-			loggingLabel.sizeToFit()
-			loggingLabel.frame.size.width = oldWidth
-		}
-		print("MJG ------------------------------------------------------------------->>> \(string)")
-		return newString
-	}
-}
+//// add strings together = append. this is a continuous logging string
+//extension String {
+//	func add(string: String) -> String {
+//		let dateFormatter = DateFormatter()
+//		dateFormatter.dateFormat = "h:mm"
+//		let dateString = dateFormatter.string(from: Date())
+//		var newString = self + "  " + dateString
+//		newString = newString + " " + string + "\n"
+//		DispatchQueue.main.async {
+//			let oldWidth = loggingLabel.frame.size.width
+//			loggingLabel.text = newString
+//			loggingLabel.sizeToFit()
+//			loggingLabel.frame.size.width = oldWidth
+//		}
+//		print("MJG ------------------------------------------------------------------->>> \(string)")
+//		return newString
+//	}
+//}
 

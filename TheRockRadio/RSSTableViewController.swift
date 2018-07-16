@@ -190,12 +190,4 @@ class RSSTableViewController: UITableViewController {
 		let urlString = rssData.link.replacingOccurrences(of: " |\n", with: "", options: .regularExpression)
 		webVC.loadURL(url: urlString)
 	}
-
-	func OLDtableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-		let storyboard = UIStoryboard(name: "Main", bundle: nil)
-		guard let detailsVC = storyboard.instantiateViewController(withIdentifier: "RSSDetailsViewController") as? RSSDetailsViewController else { return }
-		detailsVC.rssData = rssArray[indexPath.row]
-		rssArray[indexPath.row].read = true
-		self.navigationController?.pushViewController(detailsVC, animated: true)
-	}
 }

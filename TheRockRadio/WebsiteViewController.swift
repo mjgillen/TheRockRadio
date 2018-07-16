@@ -12,9 +12,9 @@ import MessageUI
 class WebsiteViewController: UIViewController {
 
 	@IBOutlet weak var callButton: UIButton!
-//	@IBOutlet weak var websiteButton: UIButton!
+	@IBOutlet weak var websiteButton: UIButton!
 	@IBOutlet weak var contactButton: UIButton!
-//	@IBOutlet weak var donateButton: UIButton!
+	@IBOutlet weak var donateButton: UIButton!
 	
 	var mailDelegate:           MFMailComposeViewControllerDelegate!
 
@@ -23,25 +23,33 @@ class WebsiteViewController: UIViewController {
 		guard let number = URL(string: "tel://8057722037") else { return }
 		UIApplication.shared.open(number)	}
 	
-//	@IBAction func onWebsiteButton(_ sender: Any) {
+	@IBAction func onWebsiteButton(_ sender: Any) {
+//		// Launch Safari
 //		if let link = URL(string: "https://www.esterobayradio.org") {
 //			UIApplication.shared.open(link)
 //		}
-//	}
+		
+		// Embed in App
+		let webVC = BasicWebViewController()
+		self.navigationController?.pushViewController(webVC, animated: true)
+		webVC.loadURL(url: "https://www.esterobayradio.org")
+	}
 	
 	@IBAction func onContactButton(_ sender: Any) {
 		sendFeedbackEmail()
-//		if let link = URL(string: "https://www.esterobayradio.org/contact") {
-//			UIApplication.shared.open(link)
-//		}
 	}
 	
-//	@IBAction func onDonateButton(_ sender: Any) {
-//		if let link = URL(string: "https://www.esterobayradio.org/support-the-rock") {
-//			UIApplication.shared.open(link)
-//		}
-//	}
-	
+	@IBAction func onDonateButton(_ sender: Any) {
+		if let link = URL(string: "https://www.esterobayradio.org/support-the-rock") {
+			UIApplication.shared.open(link)
+		}
+		
+// new way doesn't work with PayPal
+//		 Embed in App
+//		let webVC = BasicWebViewController()
+//		self.navigationController?.pushViewController(webVC, animated: true)
+//		webVC.loadURL(url: "https://www.esterobayradio.org/support-the-rock")
+	}
 	
 	override func viewDidLoad() {
         super.viewDidLoad()
@@ -65,7 +73,7 @@ class WebsiteViewController: UIViewController {
 			let appVersion = versionNumber + buildNumber
 			let emailAddress = "YourVoice@CentralCoastRadio.org"
 			mail.setToRecipients([emailAddress])
-			mail.setSubject("The Rock App v\(appVersion) Feedback")
+			mail.setSubject("The Rock Community Radio App v\(appVersion) Feedback")
 			let messageBody = "\n\n"
 			mail.setMessageBody(messageBody, isHTML: false)
 			present(mail, animated: true)

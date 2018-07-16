@@ -18,9 +18,9 @@ class Common: NSObject {
 	static let playlistURL = "https://public.radio.co/stations/s96fbbec3a/status"
 
 	class func updateNowPlaying() {
-		loggingText = loggingText.add(string: "updateNowPlaying CALLED")
+//		loggingText = loggingText.add(string: "updateNowPlaying CALLED")
 		let artwork = MPMediaItemArtwork.init(boundsSize: albumArtwork.size, requestHandler: { (size) -> UIImage in
-			loggingText = loggingText.add(string: "updateNowPlaying IN BLOCK")
+//			loggingText = loggingText.add(string: "updateNowPlaying IN BLOCK")
 			return albumArtwork
 		})
 

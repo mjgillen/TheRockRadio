@@ -22,7 +22,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 			try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback)
 			try AVAudioSession.sharedInstance().setActive(true)
 		} catch  {
-			loggingText = loggingText.add(string: "AVAudioSession.sharedInstance().setCategory error = \(error)")
+//			loggingText = loggingText.add(string: "AVAudioSession.sharedInstance().setCategory error = \(error)")
 		}
 		return true
 	}
