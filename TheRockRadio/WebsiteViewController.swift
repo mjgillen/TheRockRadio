@@ -3,7 +3,7 @@
 //  TheRockRadio
 //
 //  Created by Michael Gillen on 5/5/18.
-//  Copyright © 2018 On The Move Software. All rights reserved.
+//  Copyright © 2018 Estero Bay Community Radio. All rights reserved.
 //
 
 import UIKit
