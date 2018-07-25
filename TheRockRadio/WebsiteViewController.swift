@@ -24,15 +24,15 @@ class WebsiteViewController: UIViewController {
 		UIApplication.shared.open(number)	}
 	
 	@IBAction func onWebsiteButton(_ sender: Any) {
-//		// Launch Safari
-//		if let link = URL(string: "https://www.esterobayradio.org") {
-//			UIApplication.shared.open(link)
-//		}
+		// Launch Safari
+		if let link = URL(string: "https://www.esterobayradio.org") {
+			UIApplication.shared.open(link)
+		}
 		
-		// Embed in App
-		let webVC = BasicWebViewController()
-		self.navigationController?.pushViewController(webVC, animated: true)
-		webVC.loadURL(url: "https://www.esterobayradio.org")
+//		// Embed in App
+//		let webVC = BasicWebViewController()
+//		self.navigationController?.pushViewController(webVC, animated: true)
+//		webVC.loadURL(url: "https://www.esterobayradio.org")
 	}
 	
 	@IBAction func onContactButton(_ sender: Any) {
