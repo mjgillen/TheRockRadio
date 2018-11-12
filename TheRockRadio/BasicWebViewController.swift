@@ -9,7 +9,7 @@ import MessageUI
 open class BasicWebViewController: UIViewController, WKNavigationDelegate {
     let webView = WKWebView()
 //    let toolbar = UIToolbar()
-    let progressSpinner = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+    let progressSpinner = UIActivityIndicatorView(style: .gray)
 //    var webBack: UIBarButtonItem!
 //    var webForward: UIBarButtonItem!
 	

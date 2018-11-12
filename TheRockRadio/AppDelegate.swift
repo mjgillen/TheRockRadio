@@ -16,10 +16,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 	var window: UIWindow?
 
 
-	func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+	func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 		
 		do {
-			try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback)
+			try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playback,
+															mode: AVAudioSession.Mode.default,
+															options: [.allowAirPlay, .allowBluetooth, .allowBluetoothA2DP])
 			try AVAudioSession.sharedInstance().setActive(true)
 		} catch  {
 //			loggingText = loggingText.add(string: "AVAudioSession.sharedInstance().setCategory error = \(error)")
@@ -54,4 +56,3 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 //		loggingText = loggingText.add(string: "applicationWillTerminate")
 	}
 }
-

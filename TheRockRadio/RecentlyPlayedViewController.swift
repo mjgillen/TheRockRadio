@@ -27,13 +27,13 @@ class RecentlyPlayedViewController: UIViewController {
 	
 	@objc func handleNotification(notification: NSNotification) {
 		guard let historyDict = notification.userInfo as? [String: Any] else { return }
-		var titleAttributes: [NSAttributedStringKey : Any] = [
-			NSAttributedStringKey.foregroundColor : UIColor.black,
-			NSAttributedStringKey.font : UIFont.systemFont(ofSize: 25)
+		var titleAttributes: [NSAttributedString.Key : Any] = [
+			NSAttributedString.Key.foregroundColor : UIColor.black,
+			NSAttributedString.Key.font : UIFont.systemFont(ofSize: 25)
 		]
 		let playlist = NSMutableAttributedString.init(string: "Recently Played\n", attributes: titleAttributes)
-		titleAttributes[NSAttributedStringKey.font] = UIFont.systemFont(ofSize: 18)
-		titleAttributes[NSAttributedStringKey.foregroundColor] = UIColor.blue
+		titleAttributes[NSAttributedString.Key.font] = UIFont.systemFont(ofSize: 18)
+		titleAttributes[NSAttributedString.Key.foregroundColor] = UIColor.blue
 		for dict in historyDict {
 			if dict.key == "History" {
 				let historyArray = dict.value as! [Any]

@@ -124,8 +124,8 @@ class HomeScreenViewController: UIViewController {
 
 		// handle interruptions
 		DispatchQueue.main.async {
-			notificationCenter.addObserver(self, selector: #selector(HomeScreenViewController.handleInterruption), name: .AVAudioSessionInterruption, object: AVAudioSession.sharedInstance)
-			notificationCenter.addObserver(self, selector: #selector(HomeScreenViewController.handleRouteChange), name: .AVAudioSessionRouteChange, object: nil)
+			notificationCenter.addObserver(self, selector: #selector(HomeScreenViewController.handleInterruption), name: AVAudioSession.interruptionNotification, object: AVAudioSession.sharedInstance)
+			notificationCenter.addObserver(self, selector: #selector(HomeScreenViewController.handleRouteChange), name: AVAudioSession.routeChangeNotification, object: nil)
 		}
 	}
 
@@ -174,7 +174,9 @@ class HomeScreenViewController: UIViewController {
 		// Reactivate the Audio Session
 		do {
 //			loggingText = loggingText.add(string: "reloadURL-> AVAudioSession.setActive")
-			try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback)
+			try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playback,
+															mode: AVAudioSession.Mode.default,
+															options: [.allowAirPlay, .allowBluetooth, .allowBluetoothA2DP])
 			try AVAudioSession.sharedInstance().setActive(true)
 			
 //			loggingText = loggingText.add(string: "reloadURL-> AVAudioSession.setActive = TRUE")
@@ -302,14 +304,14 @@ class HomeScreenViewController: UIViewController {
 	}
 	
 	func updateSongLabel() {
-		let titleAttributes: [NSAttributedStringKey : Any] = [
-			NSAttributedStringKey.foregroundColor : UIColor.black,
-			NSAttributedStringKey.font : UIFont.systemFont(ofSize: 30)
+		let titleAttributes: [NSAttributedString.Key : Any] = [
+			NSAttributedString.Key.foregroundColor : UIColor.black,
+			NSAttributedString.Key.font : UIFont.systemFont(ofSize: 30)
 		]
 		let displayString = NSMutableAttributedString.init(string: trackTitle + "\n", attributes: titleAttributes)
 		let artistAttributes = [
-			NSAttributedStringKey.foregroundColor : UIColor.red,
-			NSAttributedStringKey.font : UIFont.systemFont(ofSize: 20)
+			NSAttributedString.Key.foregroundColor : UIColor.red,
+			NSAttributedString.Key.font : UIFont.systemFont(ofSize: 20)
 		]
 		displayString.append(NSAttributedString.init(string: trackArtist, attributes: artistAttributes))
 		
@@ -345,7 +347,7 @@ class HomeScreenViewController: UIViewController {
 //		loggingText = loggingText.add(string: "handleInterruption notification")
 		guard let userInfo = notification.userInfo,
 			let typeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
-			let type = AVAudioSessionInterruptionType(rawValue: typeValue) else {
+			let type = AVAudioSession.InterruptionType(rawValue: typeValue) else {
 				return
 		}
 		guard let playerViewController = playerViewController else { return }
@@ -360,7 +362,7 @@ class HomeScreenViewController: UIViewController {
 		}
 		else if type == .ended {
 			if let optionsValue = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt {
-				let options = AVAudioSessionInterruptionOptions(rawValue: optionsValue)
+				let options = AVAudioSession.InterruptionOptions(rawValue: optionsValue)
 				if options.contains(.shouldResume) {
 					// Interruption Ended - playback should resume
 //					loggingText = loggingText.add(string: "Interruption Ended")
@@ -381,7 +383,7 @@ class HomeScreenViewController: UIViewController {
 	@objc func handleRouteChange(notification: Notification) {
 		guard let userInfo = notification.userInfo,
 			let reasonValue = userInfo[AVAudioSessionRouteChangeReasonKey] as? UInt,
-			let reason = AVAudioSessionRouteChangeReason(rawValue:reasonValue) else {
+			let reason = AVAudioSession.RouteChangeReason(rawValue:reasonValue) else {
 				return
 		}
 //		loggingText = loggingText.add(string: "handleRouteChange")
@@ -524,3 +526,8 @@ extension HomeScreenViewController: AssetPlaybackDelegate {
 //	}
 //}
 
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromAVAudioSessionCategory(_ input: AVAudioSession.Category) -> String {
+	return input.rawValue
+}
