@@ -89,17 +89,17 @@ extension RSSTableViewController: XMLParserDelegate {
 	
 	func parser(_ parser: XMLParser, foundCharacters string: String) {
 		switch currentElement {
-		case .item:
+		case .item?:
 			break
-		case .title:
+		case .title?:
 			xTitle = xTitle + string
-		case .link:
+		case .link?:
 			xLink = xLink + string
-		case .description:
+		case .description?:
 			xDescription = xDescription + string
-		case .pubDate:
+		case .pubDate?:
 			xPubDate = xPubDate + string
-		case .guid:
+		case .guid?:
 			xGUID = xGUID + string
 			break
 		default:
