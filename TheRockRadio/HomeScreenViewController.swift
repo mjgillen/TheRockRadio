@@ -202,7 +202,7 @@ class HomeScreenViewController: UIViewController {
 	}
 	
 	@objc func handleNewSongNotification(notification: NSNotification) {
-		getStationPlaylistInfo()
+//		getStationPlaylistInfo()
 	}
 	
 	func getStationPlaylistInfo() {
@@ -306,7 +306,7 @@ class HomeScreenViewController: UIViewController {
 	func updateSongLabel() {
 		let titleAttributes: [NSAttributedString.Key : Any] = [
 			NSAttributedString.Key.foregroundColor : UIColor.black,
-			NSAttributedString.Key.font : UIFont.systemFont(ofSize: 30)
+			NSAttributedString.Key.font : UIFont.systemFont(ofSize: 20)
 		]
 		let displayString = NSMutableAttributedString.init(string: trackTitle + "\n", attributes: titleAttributes)
 		let artistAttributes = [
