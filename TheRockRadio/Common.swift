@@ -10,11 +10,11 @@ import UIKit
 import MediaPlayer
 class Common: NSObject {
 	
-	static let defaultTrackTitle = "97.3 / 107.9 The Rock"
-	static let defaultTrackArtist = "KEBF/KZSR"
-	static let defaultAlbumArtwork: UIImage = #imageLiteral(resourceName: "RockLogo")
-	static let defaultNowPlayingAlbumArtwork: UIImage = #imageLiteral(resourceName: "NowPlayingIcon")
-	static let streamingURL = "https://streaming.radio.co/s96fbbec3a/listen"
+	static let defaultTrackTitle = "c89.5 SEATTLE'S HOME FOR DANCE"
+	static let defaultTrackArtist = "KNHC Public Radio"
+	static let defaultAlbumArtwork: UIImage = #imageLiteral(resourceName: "c895Logo")
+	static let defaultNowPlayingAlbumArtwork: UIImage = #imageLiteral(resourceName: "c895Logo")
+	static let streamingURL = "http://streams.c895.org/live.m3u"
 	static let playlistURL = "https://public.radio.co/stations/s96fbbec3a/status"
 	
 	// Google Ads
