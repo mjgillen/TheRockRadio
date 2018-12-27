@@ -9,6 +9,7 @@
 import UIKit
 import AVKit
 import MediaPlayer
+import GoogleMobileAds
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -26,6 +27,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 		} catch  {
 //			loggingText = loggingText.add(string: "AVAudioSession.sharedInstance().setCategory error = \(error)")
 		}
+		
+		// Initialize the Google Mobile Ads SDK.
+		// My Ad
+//		GADMobileAds.configure(withApplicationID: Common.productionGoogleAdID)
+		// Test Ads
+		GADMobileAds.configure(withApplicationID: Common.testGoogleAdID)
 		return true
 	}
 

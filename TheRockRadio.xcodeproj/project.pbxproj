@@ -24,6 +24,7 @@
 		4CEF5CBD209EA49E006EEEA1 /* WebsiteViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEF5CBC209EA49E006EEEA1 /* WebsiteViewController.swift */; };
 		4CFCAB0E20BAE74B00B28844 /* LoggerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CFCAB0D20BAE74B00B28844 /* LoggerViewController.swift */; };
 		4CFF8AE3209551B100921DC8 /* RockPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CFF8AE2209551B100921DC8 /* RockPageViewController.swift */; };
+		D87118EF3B3E315945283AE4 /* Pods_TheRockRadio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED0AE2ED8BCD190BE8AC50BD /* Pods_TheRockRadio.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -47,6 +48,9 @@
 		4CEF5CBC209EA49E006EEEA1 /* WebsiteViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebsiteViewController.swift; sourceTree = "<group>"; };
 		4CFCAB0D20BAE74B00B28844 /* LoggerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggerViewController.swift; sourceTree = "<group>"; };
 		4CFF8AE2209551B100921DC8 /* RockPageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RockPageViewController.swift; sourceTree = "<group>"; };
+		64D54F424275877071D5C997 /* Pods-TheRockRadio.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TheRockRadio.debug.xcconfig"; path = "Pods/Target Support Files/Pods-TheRockRadio/Pods-TheRockRadio.debug.xcconfig"; sourceTree = "<group>"; };
+		A1E47EEEBEF31709846EAC16 /* Pods-TheRockRadio.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TheRockRadio.release.xcconfig"; path = "Pods/Target Support Files/Pods-TheRockRadio/Pods-TheRockRadio.release.xcconfig"; sourceTree = "<group>"; };
+		ED0AE2ED8BCD190BE8AC50BD /* Pods_TheRockRadio.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_TheRockRadio.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,6 +58,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D87118EF3B3E315945283AE4 /* Pods_TheRockRadio.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -66,6 +71,7 @@
 				4C4E35EA2055D20600833DB5 /* TheRockRadio */,
 				4C4E35E92055D20600833DB5 /* Products */,
 				4CD744A7208B9E9D0023EAA7 /* Frameworks */,
+				5E45FD65C6687CC1F2B0BCF4 /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -122,8 +128,18 @@
 		4CD744A7208B9E9D0023EAA7 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				ED0AE2ED8BCD190BE8AC50BD /* Pods_TheRockRadio.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		5E45FD65C6687CC1F2B0BCF4 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				64D54F424275877071D5C997 /* Pods-TheRockRadio.debug.xcconfig */,
+				A1E47EEEBEF31709846EAC16 /* Pods-TheRockRadio.release.xcconfig */,
+			);
+			name = Pods;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -133,9 +149,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4C4E35FA2055D20600833DB5 /* Build configuration list for PBXNativeTarget "TheRockRadio" */;
 			buildPhases = (
+				811BAE8A830FDCBDCF61464D /* [CP] Check Pods Manifest.lock */,
 				4C4E35E42055D20600833DB5 /* Sources */,
 				4C4E35E52055D20600833DB5 /* Frameworks */,
 				4C4E35E62055D20600833DB5 /* Resources */,
+				FFD38955D6685C2A2172186F /* [CP] Embed Pods Frameworks */,
+				569245574FD908F431290118 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -202,6 +221,57 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		569245574FD908F431290118 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-TheRockRadio/Pods-TheRockRadio-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		811BAE8A830FDCBDCF61464D /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-TheRockRadio-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		FFD38955D6685C2A2172186F /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-TheRockRadio/Pods-TheRockRadio-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		4C4E35E42055D20600833DB5 /* Sources */ = {
@@ -359,6 +429,7 @@
 		};
 		4C4E35FB2055D20600833DB5 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 64D54F424275877071D5C997 /* Pods-TheRockRadio.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = TheRockRadio/TheRockRadio.entitlements;
@@ -379,6 +450,7 @@
 		};
 		4C4E35FC2055D20600833DB5 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A1E47EEEBEF31709846EAC16 /* Pods-TheRockRadio.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = TheRockRadio/TheRockRadio.entitlements;

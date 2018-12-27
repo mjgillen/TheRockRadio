@@ -10,6 +10,7 @@ import UIKit
 import AVKit
 import MediaPlayer
 import SystemConfiguration
+import GoogleMobileAds
 
 //// Logging
 //var loggingText = ""
@@ -105,6 +106,9 @@ class HomeScreenViewController: UIViewController {
 	
 	fileprivate var playerViewController: AVPlayerViewController?
 	
+	// Google Ad Banner View
+	@IBOutlet weak var gadBannerView: GADBannerView!
+	
 	// UI in the player window
 	var playerWindowSongLabel: UILabel!
 	var playerWindowAlbumArtwork: UIImageView!
@@ -127,6 +131,13 @@ class HomeScreenViewController: UIViewController {
 			notificationCenter.addObserver(self, selector: #selector(HomeScreenViewController.handleInterruption), name: AVAudioSession.interruptionNotification, object: AVAudioSession.sharedInstance)
 			notificationCenter.addObserver(self, selector: #selector(HomeScreenViewController.handleRouteChange), name: AVAudioSession.routeChangeNotification, object: nil)
 		}
+		
+		// Google Ads
+//		self.gadBannerView.adUnitID = Common.productionGoogleAdID
+		self.gadBannerView.adUnitID = Common.testGoogleAdID
+		self.gadBannerView.rootViewController = self
+		self.gadBannerView.delegate = self
+		self.gadBannerView.load(GADRequest())
 	}
 
 	override func didReceiveMemoryWarning() {
@@ -162,6 +173,27 @@ class HomeScreenViewController: UIViewController {
 		}
 	}
 	
+	func addBannerViewToView(_ bannerView: GADBannerView) {
+		bannerView.translatesAutoresizingMaskIntoConstraints = false
+		view.addSubview(bannerView)
+		view.addConstraints(
+			[NSLayoutConstraint(item: bannerView,
+								attribute: .bottom,
+								relatedBy: .equal,
+								toItem: bottomLayoutGuide,
+								attribute: .top,
+								multiplier: 1,
+								constant: 0),
+			 NSLayoutConstraint(item: bannerView,
+								attribute: .centerX,
+								relatedBy: .equal,
+								toItem: view,
+								attribute: .centerX,
+								multiplier: 1,
+								constant: 0)
+			])
+	}
+
 	@objc func reloadURL() {
 //		loggingText = loggingText.add(string: "reloadURL")
 		
@@ -530,4 +562,40 @@ extension HomeScreenViewController: AssetPlaybackDelegate {
 // Helper function inserted by Swift 4.2 migrator.
 fileprivate func convertFromAVAudioSessionCategory(_ input: AVAudioSession.Category) -> String {
 	return input.rawValue
+}
+
+extension HomeScreenViewController: GADBannerViewDelegate {
+	
+	/// Tells the delegate an ad request loaded an ad.
+	func adViewDidReceiveAd(_ bannerView: GADBannerView) {
+		print("adViewDidReceiveAd")
+	}
+	
+	/// Tells the delegate an ad request failed.
+	func adView(_ bannerView: GADBannerView,
+				didFailToReceiveAdWithError error: GADRequestError) {
+		print("adView:didFailToReceiveAdWithError: \(error.localizedDescription)")
+	}
+	
+	/// Tells the delegate that a full-screen view will be presented in response
+	/// to the user clicking on an ad.
+	func adViewWillPresentScreen(_ bannerView: GADBannerView) {
+		print("adViewWillPresentScreen")
+	}
+	
+	/// Tells the delegate that the full-screen view will be dismissed.
+	func adViewWillDismissScreen(_ bannerView: GADBannerView) {
+		print("adViewWillDismissScreen")
+	}
+	
+	/// Tells the delegate that the full-screen view has been dismissed.
+	func adViewDidDismissScreen(_ bannerView: GADBannerView) {
+		print("adViewDidDismissScreen")
+	}
+	
+	/// Tells the delegate that a user click will open another app (such as
+	/// the App Store), backgrounding the current app.
+	func adViewWillLeaveApplication(_ bannerView: GADBannerView) {
+		print("adViewWillLeaveApplication")
+	}
 }
