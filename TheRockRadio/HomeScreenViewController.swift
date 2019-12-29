@@ -234,7 +234,7 @@ class HomeScreenViewController: UIViewController {
 	}
 	
 	@objc func handleNewSongNotification(notification: NSNotification) {
-//		getStationPlaylistInfo()
+		getStationPlaylistInfo()
 	}
 	
 	func getStationPlaylistInfo() {
@@ -267,7 +267,7 @@ class HomeScreenViewController: UIViewController {
 	func processJSON(_ jsonData: RadioJSON) {
 		
 //		loggingText = loggingText.add(string: "processJSON")
-		(trackTitle, trackArtist) = sliceJSONSongString(songString: jsonData.currentTrack.title)
+		(trackArtist, trackTitle) = sliceJSONSongString(songString: jsonData.currentTrack.title)
 		if trackTitle == "Unknown" || trackTitle == "" {
 			trackTitle = Common.defaultTrackTitle
 			trackArtist = Common.defaultTrackArtist
@@ -313,26 +313,26 @@ class HomeScreenViewController: UIViewController {
 	}
 
 	func sliceJSONSongString(songString: String) -> (String, String) {
-		var trackTitle = ""
 		var trackArtist = ""
+		var trackTitle = ""
 		let stringSplit = songString.components(separatedBy: " - ")
 		switch stringSplit.count {
 		case 0,1:
-			trackTitle = stringSplit.first!
+			trackArtist = stringSplit.first!
 		case 2:
-			trackTitle = stringSplit.first!
-			trackArtist = stringSplit.last!
+			trackArtist = stringSplit.first!
+			trackTitle = stringSplit.last!
 		default: // more than two
-			trackTitle = stringSplit.first!
+			trackArtist = stringSplit.first!
 			for index in 1..<stringSplit.count {
 				if index == 1 {
-					trackArtist = trackArtist + stringSplit[index]
+					trackTitle = trackTitle + stringSplit[index]
 				} else {
-					trackArtist = trackArtist + " - " + stringSplit[index]
+					trackTitle = trackTitle + " - " + stringSplit[index]
 				}
 			}
 		}
-		return (trackTitle, trackArtist)
+		return (trackArtist, trackTitle)
 	}
 	
 	func updateSongLabel() {
