@@ -18,6 +18,7 @@
 		4C4E360A2055D80700833DB5 /* Asset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C4E36082055D80700833DB5 /* Asset.swift */; };
 		4C4E360C2055D82500833DB5 /* Streams.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4C4E360B2055D82500833DB5 /* Streams.plist */; };
 		4C8AB22E205761A200E61251 /* HomeScreenViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8AB22D205761A200E61251 /* HomeScreenViewController.swift */; };
+		4CB66EC623BA60C6006F0D4E /* TheRockAds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB66EC523BA60C6006F0D4E /* TheRockAds.swift */; };
 		4CD7262D205D7708001B25BF /* RecentlyPlayedViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD7262C205D7708001B25BF /* RecentlyPlayedViewController.swift */; };
 		4CDCEA5720C2E6D400C4BE61 /* BasicWebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CDCEA5620C2E6D400C4BE61 /* BasicWebViewController.swift */; };
 		4CE0F1FB20BCDDC70096A5DD /* RSSTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE0F1FA20BCDDC70096A5DD /* RSSTableViewController.swift */; };
@@ -42,6 +43,7 @@
 		4C4E360B2055D82500833DB5 /* Streams.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Streams.plist; sourceTree = "<group>"; };
 		4C8AB22D205761A200E61251 /* HomeScreenViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScreenViewController.swift; sourceTree = "<group>"; };
 		4CA3AA7F208BAE6C00CFC94C /* TheRockRadio.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = TheRockRadio.entitlements; sourceTree = "<group>"; };
+		4CB66EC523BA60C6006F0D4E /* TheRockAds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheRockAds.swift; sourceTree = "<group>"; };
 		4CD7262C205D7708001B25BF /* RecentlyPlayedViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentlyPlayedViewController.swift; sourceTree = "<group>"; };
 		4CDCEA5620C2E6D400C4BE61 /* BasicWebViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BasicWebViewController.swift; sourceTree = "<group>"; };
 		4CE0F1FA20BCDDC70096A5DD /* RSSTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RSSTableViewController.swift; sourceTree = "<group>"; };
@@ -96,6 +98,7 @@
 				4CFCAB0D20BAE74B00B28844 /* LoggerViewController.swift */,
 				4C13086620BC8ABC00F39891 /* Common.swift */,
 				4CDCEA5620C2E6D400C4BE61 /* BasicWebViewController.swift */,
+				4CB66EC523BA60C6006F0D4E /* TheRockAds.swift */,
 				4C4E35FD2055D7EC00833DB5 /* Managers */,
 				4C4E36062055D80700833DB5 /* Model */,
 				4C4E35F22055D20600833DB5 /* Assets.xcassets */,
@@ -173,11 +176,11 @@
 			attributes = {
 				LastSwiftUpdateCheck = 0920;
 				LastUpgradeCheck = 0930;
-				ORGANIZATIONNAME = "paradigm-performance";
+				ORGANIZATIONNAME = "On The Move Software";
 				TargetAttributes = {
 					4C4E35E72055D20600833DB5 = {
 						CreatedOnToolsVersion = 9.2;
-						LastSwiftMigration = 1010;
+						LastSwiftMigration = 1130;
 						ProvisioningStyle = Manual;
 						SystemCapabilities = {
 							com.apple.BackgroundModes = {
@@ -287,6 +290,7 @@
 				4C4E36042055D7EC00833DB5 /* StreamListManager.swift in Sources */,
 				4CE0F1FB20BCDDC70096A5DD /* RSSTableViewController.swift in Sources */,
 				4CD7262D205D7708001B25BF /* RecentlyPlayedViewController.swift in Sources */,
+				4CB66EC623BA60C6006F0D4E /* TheRockAds.swift in Sources */,
 				4C4E360A2055D80700833DB5 /* Asset.swift in Sources */,
 				4CFF8AE3209551B100921DC8 /* RockPageViewController.swift in Sources */,
 				4C4E36092055D80700833DB5 /* Stream.swift in Sources */,
@@ -435,6 +439,7 @@
 				CODE_SIGN_ENTITLEMENTS = TheRockRadio/TheRockRadio.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 5UFVF24W7K;
 				INFOPLIST_FILE = TheRockRadio/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
@@ -443,7 +448,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "9c9fd20e-72cf-4f3d-aecc-66f2e83e8d72";
 				PROVISIONING_PROFILE_SPECIFIER = "CarPlay iOS Development December 2019";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -456,6 +461,7 @@
 				CODE_SIGN_ENTITLEMENTS = TheRockRadio/TheRockRadio.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 5UFVF24W7K;
 				INFOPLIST_FILE = TheRockRadio/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
@@ -464,7 +470,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "9c9fd20e-72cf-4f3d-aecc-66f2e83e8d72";
 				PROVISIONING_PROFILE_SPECIFIER = "CarPlay iOS Development December 2019";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;

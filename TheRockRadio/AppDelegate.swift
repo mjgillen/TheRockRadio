@@ -32,7 +32,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 		// My Ad
 //		GADMobileAds.configure(withApplicationID: Common.productionGoogleAdID)
 		// Test Ads
-		GADMobileAds.configure(withApplicationID: Common.testGoogleAdID)
+//		GADMobileAds.configure(withApplicationID: Common.testGoogleAdID)
 		return true
 	}
 

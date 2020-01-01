@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="0GS-23-uGy">
-    <device id="retina4_7" orientation="portrait">
-        <adaptation id="fullscreen"/>
-    </device>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15702" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="0GS-23-uGy">
+    <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15704"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -15,7 +13,7 @@
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="0GS-23-uGy" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="HCo-nV-RNR">
-                        <rect key="frame" x="0.0" y="20" width="375" height="44"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <nil name="viewControllers"/>
@@ -40,22 +38,34 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="7u5-Im-OKr" userLabel="Top Container View">
-                                <rect key="frame" x="0.0" y="64" width="375" height="303.5"/>
+                                <rect key="frame" x="0.0" y="44" width="375" height="303.5"/>
                                 <connections>
                                     <segue destination="3bu-eb-kKr" kind="embed" id="hJN-m0-en7"/>
                                 </connections>
                             </containerView>
                             <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="bAI-vC-bfB" userLabel="Bottom Container View">
-                                <rect key="frame" x="0.0" y="367.5" width="375" height="249.5"/>
+                                <rect key="frame" x="0.0" y="347.5" width="375" height="269.5"/>
                                 <connections>
                                     <segue destination="emT-SQ-V63" kind="embed" identifier="PresentPlayerViewControllerSegueIdentifier" id="aW1-NF-4Ah"/>
                                 </connections>
                             </containerView>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="9Uw-Fx-ob5" customClass="GADBannerView">
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="9Uw-Fx-ob5">
                                 <rect key="frame" x="27.5" y="617" width="320" height="50"/>
+                                <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ONn-VS-Ae8">
+                                        <rect key="frame" x="0.0" y="0.0" width="320" height="50"/>
+                                        <connections>
+                                            <action selector="onAdButton:" destination="qYp-TT-oYM" eventType="touchUpInside" id="Gga-1z-74P"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
+                                    <constraint firstAttribute="trailing" secondItem="ONn-VS-Ae8" secondAttribute="trailing" id="AsD-VF-AE5"/>
+                                    <constraint firstItem="ONn-VS-Ae8" firstAttribute="leading" secondItem="9Uw-Fx-ob5" secondAttribute="leading" id="Lfu-Za-iBZ"/>
                                     <constraint firstAttribute="width" constant="320" id="T8P-kX-bXe"/>
+                                    <constraint firstAttribute="bottom" secondItem="ONn-VS-Ae8" secondAttribute="bottom" id="jhF-KJ-3IF"/>
+                                    <constraint firstItem="ONn-VS-Ae8" firstAttribute="top" secondItem="9Uw-Fx-ob5" secondAttribute="top" id="k0l-bi-7T0"/>
                                     <constraint firstAttribute="height" constant="50" id="wmY-ML-eez"/>
                                 </constraints>
                             </view>
@@ -77,7 +87,8 @@
                     </view>
                     <navigationItem key="navigationItem" title="The Rock Community Radio" id="c3Y-Um-fqB"/>
                     <connections>
-                        <outlet property="gadBannerView" destination="9Uw-Fx-ob5" id="GoC-yB-Hvl"/>
+                        <outlet property="adButton" destination="ONn-VS-Ae8" id="R1k-3z-wXk"/>
+                        <outlet property="adView" destination="9Uw-Fx-ob5" id="ywZ-6Z-7Kk"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="qRd-xL-D6T" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -357,18 +368,18 @@
                                 <rect key="frame" x="0.0" y="28" width="375" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="7g8-he-3NV" id="qi8-aQ-1Ur">
-                                    <rect key="frame" x="0.0" y="0.0" width="341" height="43.5"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="348" height="44"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Title" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="zdR-F3-l8l">
-                                            <rect key="frame" x="16" y="3" width="35.5" height="20.5"/>
+                                            <rect key="frame" x="16" y="4" width="35.5" height="20.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="17"/>
                                             <color key="textColor" red="0.84470324933687002" green="0.23661570346625022" blue="0.22707405770799063" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             <nil key="highlightedColor"/>
                                         </label>
                                         <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Subtitle" lineBreakMode="tailTruncation" numberOfLines="3" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="ir8-Po-cVd">
-                                            <rect key="frame" x="16" y="23.5" width="50" height="17"/>
+                                            <rect key="frame" x="16" y="24.5" width="50" height="17"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                             <nil key="textColor"/>
@@ -390,12 +401,12 @@
         </scene>
     </scenes>
     <resources>
-        <image name="RockCloudsStacks" width="1920" height="1440"/>
-        <image name="RockSurfer" width="1920" height="1280"/>
-        <image name="StacksFog" width="1920" height="1280"/>
-        <image name="contact" width="512" height="512"/>
-        <image name="donate" width="512" height="512"/>
-        <image name="phone" width="512" height="512"/>
-        <image name="website" width="512" height="512"/>
+        <image name="RockCloudsStacks" width="960" height="720"/>
+        <image name="RockSurfer" width="960" height="640"/>
+        <image name="StacksFog" width="960" height="640"/>
+        <image name="contact" width="256" height="256"/>
+        <image name="donate" width="256" height="256"/>
+        <image name="phone" width="256" height="256"/>
+        <image name="website" width="256" height="256"/>
     </resources>
 </document>

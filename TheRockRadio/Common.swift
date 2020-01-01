@@ -20,6 +20,11 @@ class Common: NSObject {
 	// Google Ads
 	static let productionGoogleAdID = "ca-app-pub-6955767719823909~7822178760"
 	static let testGoogleAdID = "ca-app-pub-3940256099942544/2934735716"
+    
+    // The Rock Ads
+    static let theRockAdsURL = "https://animalradio.com/RockUnderwriterImage.png"
+    static let theRockAdImageURL = "https://animalradio.com/images/RockUnderwriterImage.png"
+    static let theRockAdLinkURL = "https://animalradio.com/RockRedirect.html"
 
 	class func updateNowPlaying() {
 //		loggingText = loggingText.add(string: "updateNowPlaying CALLED")

@@ -107,8 +107,13 @@ class HomeScreenViewController: UIViewController {
 	fileprivate var playerViewController: AVPlayerViewController?
 	
 	// Google Ad Banner View
-	@IBOutlet weak var gadBannerView: GADBannerView!
-	
+//	@IBOutlet weak var gadBannerView: GADBannerView!
+    
+    // The Rock Ads
+    @IBOutlet weak var adView: UIView!
+    @IBOutlet weak var adButton: UIButton!
+    let theRockAds = TheRockAds()
+    
 	// UI in the player window
 	var playerWindowSongLabel: UILabel!
 	var playerWindowAlbumArtwork: UIImageView!
@@ -132,13 +137,38 @@ class HomeScreenViewController: UIViewController {
 			notificationCenter.addObserver(self, selector: #selector(HomeScreenViewController.handleRouteChange), name: AVAudioSession.routeChangeNotification, object: nil)
 		}
 		
-		// Google Ads
-//		self.gadBannerView.adUnitID = Common.productionGoogleAdID
-		self.gadBannerView.adUnitID = Common.testGoogleAdID
-		self.gadBannerView.rootViewController = self
-		self.gadBannerView.delegate = self
-		self.gadBannerView.load(GADRequest())
+//		// Google Ads
+////		self.gadBannerView.adUnitID = Common.productionGoogleAdID
+//		self.gadBannerView.adUnitID = Common.testGoogleAdID
+//		self.gadBannerView.rootViewController = self
+//		self.gadBannerView.delegate = self
+//		self.gadBannerView.load(GADRequest())
+        
+        // get The Rock Ads
+//        self.theRockAds.get()
 	}
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        if let ad = self.theRockAds.ads.first {
+            self.theRockAds.show(ad)
+        }
+
+        DispatchQueue.global().async {
+            if let url = URL(string: Common.theRockAdImageURL) {
+                if let data = try? Data( contentsOf: url)
+                {
+                  DispatchQueue.main.async {
+                     self.adButton.setBackgroundImage(UIImage( data:data), for: .normal)
+                  }
+                 } else {
+                     print("error")
+                 }
+            } else {
+                print("error")
+            }
+        }
+    }
 
 	override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -173,26 +203,34 @@ class HomeScreenViewController: UIViewController {
 		}
 	}
 	
-	func addBannerViewToView(_ bannerView: GADBannerView) {
-		bannerView.translatesAutoresizingMaskIntoConstraints = false
-		view.addSubview(bannerView)
-		view.addConstraints(
-			[NSLayoutConstraint(item: bannerView,
-								attribute: .bottom,
-								relatedBy: .equal,
-								toItem: bottomLayoutGuide,
-								attribute: .top,
-								multiplier: 1,
-								constant: 0),
-			 NSLayoutConstraint(item: bannerView,
-								attribute: .centerX,
-								relatedBy: .equal,
-								toItem: view,
-								attribute: .centerX,
-								multiplier: 1,
-								constant: 0)
-			])
-	}
+    // MARK: - Ad Banner
+    @IBAction func onAdButton(_ sender: UIButton) {
+        // Launch Safari
+        if let link = URL(string: Common.theRockAdLinkURL) {
+            UIApplication.shared.open(link)
+        }
+    }
+    
+//    func addBannerViewToView(_ bannerView: GADBannerView) {
+//		bannerView.translatesAutoresizingMaskIntoConstraints = false
+//		view.addSubview(bannerView)
+//		view.addConstraints(
+//			[NSLayoutConstraint(item: bannerView,
+//								attribute: .bottom,
+//								relatedBy: .equal,
+//								toItem: bottomLayoutGuide,
+//								attribute: .top,
+//								multiplier: 1,
+//								constant: 0),
+//			 NSLayoutConstraint(item: bannerView,
+//								attribute: .centerX,
+//								relatedBy: .equal,
+//								toItem: view,
+//								attribute: .centerX,
+//								multiplier: 1,
+//								constant: 0)
+//			])
+//	}
 
 	@objc func reloadURL() {
 //		loggingText = loggingText.add(string: "reloadURL")
@@ -564,38 +602,38 @@ fileprivate func convertFromAVAudioSessionCategory(_ input: AVAudioSession.Categ
 	return input.rawValue
 }
 
-extension HomeScreenViewController: GADBannerViewDelegate {
-	
-	/// Tells the delegate an ad request loaded an ad.
-	func adViewDidReceiveAd(_ bannerView: GADBannerView) {
-		print("adViewDidReceiveAd")
-	}
-	
-	/// Tells the delegate an ad request failed.
-	func adView(_ bannerView: GADBannerView,
-				didFailToReceiveAdWithError error: GADRequestError) {
-		print("adView:didFailToReceiveAdWithError: \(error.localizedDescription)")
-	}
-	
-	/// Tells the delegate that a full-screen view will be presented in response
-	/// to the user clicking on an ad.
-	func adViewWillPresentScreen(_ bannerView: GADBannerView) {
-		print("adViewWillPresentScreen")
-	}
-	
-	/// Tells the delegate that the full-screen view will be dismissed.
-	func adViewWillDismissScreen(_ bannerView: GADBannerView) {
-		print("adViewWillDismissScreen")
-	}
-	
-	/// Tells the delegate that the full-screen view has been dismissed.
-	func adViewDidDismissScreen(_ bannerView: GADBannerView) {
-		print("adViewDidDismissScreen")
-	}
-	
-	/// Tells the delegate that a user click will open another app (such as
-	/// the App Store), backgrounding the current app.
-	func adViewWillLeaveApplication(_ bannerView: GADBannerView) {
-		print("adViewWillLeaveApplication")
-	}
-}
+//extension HomeScreenViewController: GADBannerViewDelegate {
+//	
+//	/// Tells the delegate an ad request loaded an ad.
+//	func adViewDidReceiveAd(_ bannerView: GADBannerView) {
+//		print("adViewDidReceiveAd")
+//	}
+//	
+//	/// Tells the delegate an ad request failed.
+//	func adView(_ bannerView: GADBannerView,
+//				didFailToReceiveAdWithError error: GADRequestError) {
+//		print("adView:didFailToReceiveAdWithError: \(error.localizedDescription)")
+//	}
+//	
+//	/// Tells the delegate that a full-screen view will be presented in response
+//	/// to the user clicking on an ad.
+//	func adViewWillPresentScreen(_ bannerView: GADBannerView) {
+//		print("adViewWillPresentScreen")
+//	}
+//	
+//	/// Tells the delegate that the full-screen view will be dismissed.
+//	func adViewWillDismissScreen(_ bannerView: GADBannerView) {
+//		print("adViewWillDismissScreen")
+//	}
+//	
+//	/// Tells the delegate that the full-screen view has been dismissed.
+//	func adViewDidDismissScreen(_ bannerView: GADBannerView) {
+//		print("adViewDidDismissScreen")
+//	}
+//	
+//	/// Tells the delegate that a user click will open another app (such as
+//	/// the App Store), backgrounding the current app.
+//	func adViewWillLeaveApplication(_ bannerView: GADBannerView) {
+//		print("adViewWillLeaveApplication")
+//	}
+//}
